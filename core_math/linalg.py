@@ -197,7 +197,8 @@ class Vector:
             elif p in ('inf', 'infinity'):
                 return float(np.linalg.norm(self.data, ord=np.inf))
             elif p == 'fro':
-                return float(np.linalg.norm(self.data, ord='fro'))
+                # For vectors, Frobenius norm is equivalent to L2 norm
+                return float(np.linalg.norm(self.data, ord=2))
             else:
                 # General p-norm
                 return float(np.linalg.norm(self.data, ord=p))

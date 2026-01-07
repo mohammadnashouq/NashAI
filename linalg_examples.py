@@ -7,11 +7,12 @@ with clear examples and outputs.
 
 import sys
 import os
+import numpy as np
 
-# Add the math directory to the path so we can import linalg
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'math'))
+# Add the current directory to the path so we can import core_math
+sys.path.insert(0, os.path.dirname(__file__))
 
-from math.linalg import Vector, Matrix, EigenDecomposition
+from core_math.linalg import Vector, Matrix, EigenDecomposition
 
 
 def print_section(title: str):
