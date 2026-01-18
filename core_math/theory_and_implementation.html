@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core Math: Theory & Implementation</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            padding: 30px 40px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .toc h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .toc ul {
+            list-style: none;
+            columns: 2;
+            column-gap: 30px;
+        }
+
+        .toc li {
+            margin: 10px 0;
+            break-inside: avoid;
+        }
+
+        .toc a {
+            color: #495057;
+            text-decoration: none;
+            font-size: 1.1em;
+            transition: color 0.3s;
+            display: block;
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        .toc a:hover {
+            color: #667eea;
+            background: #e9ecef;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .algorithm-section {
+            margin-bottom: 60px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+
+        .algorithm-section h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .algorithm-section h3 {
+            color: #495057;
+            font-size: 1.5em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        .algorithm-section h4 {
+            color: #667eea;
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .math-formula {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #dee2e6;
+            overflow-x: auto;
+        }
+
+        .math-formula .formula-label {
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .code-snippet {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .code-snippet .code-header {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 10px 15px;
+            margin: -20px -20px 15px -20px;
+            border-radius: 8px 8px 0 0;
+            font-size: 0.85em;
+            border-bottom: 1px solid #3e3e3e;
+        }
+
+        .code-snippet .line-number {
+            color: #858585;
+            margin-right: 15px;
+            user-select: none;
+        }
+
+        .code-snippet .code-line {
+            display: block;
+            padding: 2px 0;
+        }
+
+        .code-snippet .highlight {
+            background: rgba(255, 255, 0, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .code-snippet .comment {
+            color: #6a9955;
+        }
+
+        .code-snippet .keyword {
+            color: #569cd6;
+        }
+
+        .code-snippet .string {
+            color: #ce9178;
+        }
+
+        .code-snippet .function {
+            color: #dcdcaa;
+        }
+
+        .theory-code-link {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .theory-code-link strong {
+            color: #856404;
+        }
+
+        .key-points {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2196F3;
+        }
+
+        .key-points ul, .key-points ol {
+            margin-left: 20px;
+        }
+
+        .key-points li {
+            margin: 10px 0;
+        }
+
+        .algorithm-type {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .optimization { background: #28a745; }
+        .linalg { background: #17a2b8; }
+        .numerical { background: #ffc107; color: #333; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Core Mathematics</h1>
+            <p>Theoretical Foundations & Implementation Mapping</p>
+        </header>
+
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#numerical-derivative">Numerical Differentiation</a></li>
+                <li><a href="#numerical-gradient">Numerical Gradient</a></li>
+                <li><a href="#numerical-hessian">Numerical Hessian</a></li>
+                <li><a href="#gradient-descent">Gradient Descent</a></li>
+                <li><a href="#stochastic-gradient-descent">Stochastic Gradient Descent</a></li>
+                <li><a href="#vector-operations">Vector Operations</a></li>
+                <li><a href="#matrix-operations">Matrix Operations</a></li>
+                <li><a href="#norms">Vector & Matrix Norms</a></li>
+                <li><a href="#eigendecomposition">Eigendecomposition</a></li>
+            </ul>
+        </div>
+
+        <div class="content">
+            <!-- Numerical Derivative -->
+            <section id="numerical-derivative" class="algorithm-section">
+                <h2>Numerical Differentiation <span class="algorithm-type numerical">Numerical Methods</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Forward Difference</span>
+                    <p>$$f'(x) \approx \frac{f(x+h) - f(x)}{h}$$</p>
+                    <p>Error: $O(h)$ - first order accuracy</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">optimization.py - Forward Difference</div>
+                    <div class="code-line"><span class="line-number">45</span>    <span class="keyword">if</span> method == <span class="string">'forward'</span>:</div>
+                    <div class="code-line"><span class="line-number">46</span>        <span class="comment"># Forward difference: f'(x) ≈ (f(x+h) - f(x)) / h</span></div>
+                    <div class="code-line"><span class="line-number">47</span>        result = <span class="highlight">(func(x + h) - func(x)) / h</span></div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Backward Difference</span>
+                    <p>$$f'(x) \approx \frac{f(x) - f(x-h)}{h}$$</p>
+                    <p>Error: $O(h)$ - first order accuracy</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">optimization.py - Backward Difference</div>
+                    <div class="code-line"><span class="line-number">48</span>    <span class="keyword">elif</span> method == <span class="string">'backward'</span>:</div>
+                    <div class="code-line"><span class="line-number">49</span>        <span class="comment"># Backward difference: f'(x) ≈ (f(x) - f(x-h)) / h</span></div>
+                    <div class="code-line"><span class="line-number">50</span>        result = <span class="highlight">(func(x) - func(x - h)) / h</span></div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Central Difference</span>
+                    <p>$$f'(x) \approx \frac{f(x+h) - f(x-h)}{2h}$$</p>
+                    <p>Error: $O(h^2)$ - second order accuracy (most accurate)</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">optimization.py - Central Difference</div>
+                    <div class="code-line"><span class="line-number">51</span>    <span class="keyword">elif</span> method == <span class="string">'central'</span>:</div>
+                    <div class="code-line"><span class="line-number">52</span>        <span class="comment"># Central difference: f'(x) ≈ (f(x+h) - f(x-h)) / (2h)</span></div>
+                    <div class="code-line"><span class="line-number">53</span>        <span class="comment"># This is more accurate (O(h²) error vs O(h))</span></div>
+                    <div class="code-line"><span class="line-number">54</span>        result = <span class="highlight">(func(x + h) - func(x - h)) / (2 * h)</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Details:</h4>
+                    <ul>
+                        <li><strong>Forward difference</strong> (line 47): Uses future point, $O(h)$ error</li>
+                        <li><strong>Backward difference</strong> (line 50): Uses past point, $O(h)$ error</li>
+                        <li><strong>Central difference</strong> (line 54): Uses both sides, $O(h^2)$ error - most accurate</li>
+                        <li>Default method is central difference for better accuracy</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Numerical Gradient -->
+            <section id="numerical-gradient" class="algorithm-section">
+                <h2>Numerical Gradient <span class="algorithm-type numerical">Numerical Methods</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Gradient Vector</span>
+                    <p>$$\nabla f(\mathbf{x}) = \begin{bmatrix} \frac{\partial f}{\partial x_1} \\ \frac{\partial f}{\partial x_2} \\ \vdots \\ \frac{\partial f}{\partial x_n} \end{bmatrix}$$</p>
+                    <p>Each partial derivative computed using central difference:</p>
+                    <p>$$\frac{\partial f}{\partial x_i} \approx \frac{f(\mathbf{x} + h\mathbf{e}_i) - f(\mathbf{x} - h\mathbf{e}_i)}{2h}$$</p>
+                    <p>where $\mathbf{e}_i$ is the $i$-th unit vector</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">optimization.py - Numerical Gradient</div>
+                    <div class="code-line"><span class="line-number">91</span>    x = np.asarray(x, dtype=float).flatten()</div>
+                    <div class="code-line"><span class="line-number">92</span>    gradient = np.zeros_like(x)</div>
+                    <div class="code-line"><span class="line-number">94</span>    <span class="comment"># Compute partial derivative with respect to each dimension</span></div>
+                    <div class="code-line"><span class="line-number">95</span>    <span class="keyword">for</span> i <span class="keyword">in</span> range(len(x)):</div>
+                    <div class="code-line"><span class="line-number">96</span>        <span class="comment"># Create perturbed vector</span></div>
+                    <div class="code-line"><span class="line-number">97</span>        x_forward = x.copy()</div>
+                    <div class="code-line"><span class="line-number">98</span>        x_forward[i] += h  <span class="comment"># x + h*e_i</span></div>
+                    <div class="code-line"><span class="line-number">100</span>        x_backward = x.copy()</div>
+                    <div class="code-line"><span class="line-number">101</span>        x_backward[i] -= h  <span class="comment"># x - h*e_i</span></div>
+                    <div class="code-line"><span class="line-number">103</span>        <span class="comment"># Central difference for this dimension</span></div>
+                    <div class="code-line"><span class="line-number">104</span>        gradient[i] = <span class="highlight">(func(x_forward) - func(x_backward)) / (2 * h)</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Steps:</h4>
+                    <ol>
+                        <li><strong>Initialize gradient</strong> (line 92): Zero vector of same shape as input</li>
+                        <li><strong>For each dimension</strong> (line 95): Compute partial derivative</li>
+                        <li><strong>Perturbation</strong> (lines 97-101): Create $x + h\mathbf{e}_i$ and $x - h\mathbf{e}_i$</li>
+                        <li><strong>Central difference</strong> (line 104): Compute $\frac{\partial f}{\partial x_i}$</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Numerical Hessian -->
+            <section id="numerical-hessian" class="algorithm-section">
+                <h2>Numerical Hessian <span class="algorithm-type numerical">Numerical Methods</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Hessian Matrix</span>
+                    <p>$$\mathbf{H}_{ij} = \frac{\partial^2 f}{\partial x_i \partial x_j}$$</p>
+                    <p><strong>Diagonal elements</strong> (second derivative):</p>
+                    <p>$$\frac{\partial^2 f}{\partial x_i^2} \approx \frac{f(x + h\mathbf{e}_i) - 2f(x) + f(x - h\mathbf{e}_i)}{h^2}$$</p>
+                    <p><strong>Off-diagonal elements</strong> (mixed partial derivative):</p>
+                    <p>$$\frac{\partial^2 f}{\partial x_i \partial x_j} \approx \frac{f(x_{++}) - f(x_{+-}) - f(x_{-+}) + f(x_{--})}{4h^2}$$</p>
+                    <p>where $x_{++} = x + h\mathbf{e}_i + h\mathbf{e}_j$, etc.</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">optimization.py - Hessian Diagonal Elements</div>
+                    <div class="code-line"><span class="line-number">140</span>    <span class="keyword">for</span> i <span class="keyword">in</span> range(n):</div>
+                    <div class="code-line"><span class="line-number">141</span>        <span class="keyword">for</span> j <span class="keyword">in</span> range(n):</div>
+                    <div class="code-line"><span class="line-number">142</span>            <span class="keyword">if</span> i == j:</div>
+                    <div class="code-line"><span class="line-number">143</span>                <span class="comment"># Diagonal: second derivative with respect to x[i]</span></div>
+                    <div class="code-line"><span class="line-number">144</span>                x_forward = x.copy()</div>
+                    <div class="code-line"><span class="line-number">145</span>                x_forward[i] += h</div>
+                    <div class="code-line"><span class="line-number">146</span>                x_backward = x.copy()</div>
+                    <div class="code-line"><span class="line-number">147</span>                x_backward[i] -= h</div>
+                    <div class="code-line"><span class="line-number">148</span>                hessian[i, j] = <span class="highlight">(func(x_forward) - 2 * func(x) + func(x_backward)) / (h ** 2)</span></div>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">optimization.py - Hessian Off-Diagonal Elements</div>
+                    <div class="code-line"><span class="line-number">149</span>            <span class="keyword">else</span>:</div>
+                    <div class="code-line"><span class="line-number">150</span>                <span class="comment"># Off-diagonal: mixed partial derivative</span></div>
+                    <div class="code-line"><span class="line-number">151</span>                x_pp = x.copy()</div>
+                    <div class="code-line"><span class="line-number">152</span>                x_pp[i] += h</div>
+                    <div class="code-line"><span class="line-number">153</span>                x_pp[j] += h  <span class="comment"># x + h*e_i + h*e_j</span></div>
+                    <div class="code-line"><span class="line-number">155</span>                x_pm = x.copy()</div>
+                    <div class="code-line"><span class="line-number">156</span>                x_pm[i] += h</div>
+                    <div class="code-line"><span class="line-number">157</span>                x_pm[j] -= h  <span class="comment"># x + h*e_i - h*e_j</span></div>
+                    <div class="code-line"><span class="line-number">159</span>                x_mp = x.copy()</div>
+                    <div class="code-line"><span class="line-number">160</span>                x_mp[i] -= h</div>
+                    <div class="code-line"><span class="line-number">161</span>                x_mp[j] += h  <span class="comment"># x - h*e_i + h*e_j</span></div>
+                    <div class="code-line"><span class="line-number">163</span>                x_mm = x.copy()</div>
+                    <div class="code-line"><span class="line-number">164</span>                x_mm[i] -= h</div>
+                    <div class="code-line"><span class="line-number">165</span>                x_mm[j] -= h  <span class="comment"># x - h*e_i - h*e_j</span></div>
+                    <div class="code-line"><span class="line-number">167</span>                hessian[i, j] = <span class="highlight">(func(x_pp) - func(x_pm) - func(x_mp) + func(x_mm)) / (4 * h ** 2)</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Steps:</h4>
+                    <ol>
+                        <li><strong>Diagonal elements</strong> (lines 142-148): Second derivative using three-point formula</li>
+                        <li><strong>Off-diagonal elements</strong> (lines 149-167): Mixed partial derivative using four-point formula</li>
+                        <li><strong>Symmetry</strong>: Hessian is symmetric ($H_{ij} = H_{ji}$) for smooth functions</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Gradient Descent -->
+            <section id="gradient-descent" class="algorithm-section">
+                <h2>Gradient Descent <span class="algorithm-type optimization">Optimization</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Update Rule</span>
+                    <p>$$\mathbf{x}_{t+1} = \mathbf{x}_t - \alpha \nabla f(\mathbf{x}_t)$$</p>
+                    <p>where $\alpha$ is the learning rate and $\nabla f(\mathbf{x}_t)$ is the gradient</p>
+                    <p><strong>Convergence criterion:</strong></p>
+                    <p>$$|f(\mathbf{x}_{t+1}) - f(\mathbf{x}_t)| < \epsilon$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">optimization.py - Gradient Descent Update</div>
+                    <div class="code-line"><span class="line-number">258</span>    <span class="keyword">for</span> iteration <span class="keyword">in</span> range(1, self.max_iterations + 1):</div>
+                    <div class="code-line"><span class="line-number">259</span>        <span class="comment"># Compute gradient</span></div>
+                    <div class="code-line"><span class="line-number">260</span>        <span class="keyword">if</span> gradient <span class="keyword">is not</span> <span class="keyword">None</span>:</div>
+                    <div class="code-line"><span class="line-number">261</span>            grad = np.asarray(gradient(x), dtype=float).flatten()</div>
+                    <div class="code-line"><span class="line-number">262</span>        <span class="keyword">elif</span> self.use_numerical_gradient:</div>
+                    <div class="code-line"><span class="line-number">263</span>            grad = numerical_gradient(func, x, h=self.h)</div>
+                    <div class="code-line"><span class="line-number">264</span>        <span class="keyword">else</span>:</div>
+                    <div class="code-line"><span class="line-number">265</span>            <span class="comment"># Default to numerical gradient if no gradient function provided</span></div>
+                    <div class="code-line"><span class="line-number">266</span>            grad = numerical_gradient(func, x, h=self.h)</div>
+                    <div class="code-line"><span class="line-number">268</span>        <span class="comment"># Gradient descent update: x_new = x_old - learning_rate * gradient</span></div>
+                    <div class="code-line"><span class="line-number">269</span>        x = <span class="highlight">x - self.learning_rate * grad</span>  <span class="comment"># x_{t+1} = x_t - α∇f</span></div>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">optimization.py - Convergence Check</div>
+                    <div class="code-line"><span class="line-number">271</span>        <span class="comment"># Evaluate function at new position</span></div>
+                    <div class="code-line"><span class="line-number">272</span>        current_value = func(x)</div>
+                    <div class="code-line"><span class="line-number">280</span>        <span class="comment"># Check for convergence</span></div>
+                    <div class="code-line"><span class="line-number">281</span>        <span class="keyword">if</span> <span class="highlight">abs(prev_value - current_value) < self.tolerance</span>:</div>
+                    <div class="code-line"><span class="line-number">282</span>            info = {</div>
+                    <div class="code-line"><span class="line-number">283</span>                <span class="string">'converged'</span>: <span class="keyword">True</span>,</div>
+                    <div class="code-line"><span class="line-number">284</span>                <span class="string">'iterations'</span>: iteration,</div>
+                    <div class="code-line"><span class="line-number">285</span>                <span class="string">'final_value'</span>: current_value,</div>
+                    <div class="code-line"><span class="line-number">286</span>                <span class="string">'history'</span>: self.history</div>
+                    <div class="code-line"><span class="line-number">287</span>            }</div>
+                    <div class="code-line"><span class="line-number">288</span>            <span class="keyword">return</span> x, info</div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Steps:</h4>
+                    <ol>
+                        <li><strong>Compute gradient</strong> (lines 260-266): Use analytical or numerical gradient</li>
+                        <li><strong>Update parameters</strong> (line 269): $\mathbf{x}_{t+1} = \mathbf{x}_t - \alpha \nabla f$</li>
+                        <li><strong>Evaluate function</strong> (line 272): Compute $f(\mathbf{x}_{t+1})$</li>
+                        <li><strong>Check convergence</strong> (line 281): Stop if change is below tolerance</li>
+                        <li><strong>Track history</strong>: Store iterations, values, gradients, and positions</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Stochastic Gradient Descent -->
+            <section id="stochastic-gradient-descent" class="algorithm-section">
+                <h2>Stochastic Gradient Descent <span class="algorithm-type optimization">Optimization</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">SGD Update Rule</span>
+                    <p>$$\mathbf{x}_{t+1} = \mathbf{x}_t - \alpha \nabla f_{\mathcal{B}_t}(\mathbf{x}_t)$$</p>
+                    <p>where $\mathcal{B}_t$ is a random mini-batch at iteration $t$</p>
+                    <p><strong>Mini-batch gradient:</strong></p>
+                    <p>$$\nabla f_{\mathcal{B}_t}(\mathbf{x}) = \frac{1}{|\mathcal{B}_t|} \sum_{i \in \mathcal{B}_t} \nabla f_i(\mathbf{x})$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">optimization.py - Mini-batch Sampling</div>
+                    <div class="code-line"><span class="line-number">375</span>    <span class="keyword">for</span> iteration <span class="keyword">in</span> range(1, self.max_iterations + 1):</div>
+                    <div class="code-line"><span class="line-number">376</span>        <span class="comment"># Randomly sample a mini-batch</span></div>
+                    <div class="code-line"><span class="line-number">377</span>        batch_indices = <span class="highlight">np.random.choice(n_samples, size=min(self.batch_size, n_samples), replace=False)</span></div>
+                    <div class="code-line"><span class="line-number">378</span>        batch_data = data[batch_indices]</div>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">optimization.py - SGD Update</div>
+                    <div class="code-line"><span class="line-number">380</span>        <span class="comment"># Compute gradient on mini-batch</span></div>
+                    <div class="code-line"><span class="line-number">381</span>        <span class="keyword">if</span> gradient <span class="keyword">is not</span> <span class="keyword">None</span>:</div>
+                    <div class="code-line"><span class="line-number">382</span>            grad = np.asarray(gradient(x, batch_data), dtype=float).flatten()</div>
+                    <div class="code-line"><span class="line-number">383</span>        <span class="keyword">else</span>:</div>
+                    <div class="code-line"><span class="line-number">384</span>            <span class="comment"># Use numerical gradient on mini-batch</span></div>
+                    <div class="code-line"><span class="line-number">385</span>            <span class="keyword">def</span> <span class="function">batch_func</span>(params):</div>
+                    <div class="code-line"><span class="line-number">386</span>                <span class="keyword">return</span> func(params, batch_data)</div>
+                    <div class="code-line"><span class="line-number">387</span>            grad = numerical_gradient(batch_func, x, h=self.h)</div>
+                    <div class="code-line"><span class="line-number">389</span>        <span class="comment"># SGD update</span></div>
+                    <div class="code-line"><span class="line-number">390</span>        x = <span class="highlight">x - self.learning_rate * grad</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Steps:</h4>
+                    <ol>
+                        <li><strong>Sample mini-batch</strong> (lines 377-378): Randomly select subset of data</li>
+                        <li><strong>Compute batch gradient</strong> (lines 381-387): Gradient on mini-batch only</li>
+                        <li><strong>SGD update</strong> (line 390): Update using mini-batch gradient</li>
+                        <li><strong>Monitor on full dataset</strong> (line 394): Periodically evaluate on full data</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Vector Operations -->
+            <section id="vector-operations" class="algorithm-section">
+                <h2>Vector Operations <span class="algorithm-type linalg">Linear Algebra</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Dot Product</span>
+                    <p>For vectors $\mathbf{a}$ and $\mathbf{b}$:</p>
+                    <p>$$\mathbf{a} \cdot \mathbf{b} = \sum_{i=1}^{n} a_i b_i = \mathbf{a}^T \mathbf{b}$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linalg.py - Dot Product</div>
+                    <div class="code-line"><span class="line-number">120</span>        <span class="comment"># Vector dot product (1D)</span></div>
+                    <div class="code-line"><span class="line-number">121</span>        <span class="keyword">if</span> self.ndim == 1 <span class="keyword">and</span> other.ndim == 1:</div>
+                    <div class="code-line"><span class="line-number">122</span>            <span class="keyword">if</span> self.shape[0] != other.shape[0]:</div>
+                    <div class="code-line"><span class="line-number">123</span>                <span class="keyword">raise</span> ValueError(<span class="string">f"Vector lengths {self.shape[0]} and {other.shape[0]} are incompatible"</span>)</div>
+                    <div class="code-line"><span class="line-number">124</span>            <span class="keyword">return</span> <span class="highlight">float(np.dot(self.data, other.data))</span></div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Outer Product</span>
+                    <p>For vectors $\mathbf{a}$ (m×1) and $\mathbf{b}$ (n×1):</p>
+                    <p>$$\mathbf{a} \otimes \mathbf{b} = \mathbf{a} \mathbf{b}^T = \begin{bmatrix} a_1 b_1 & a_1 b_2 & \cdots \\ a_2 b_1 & a_2 b_2 & \cdots \\ \vdots & \vdots & \ddots \end{bmatrix}$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linalg.py - Outer Product</div>
+                    <div class="code-line"><span class="line-number">149</span>    <span class="keyword">def</span> <span class="function">external_multiply</span>(self, other: <span class="string">'Vector'</span>) -> <span class="string">'Vector'</span>:</div>
+                    <div class="code-line"><span class="line-number">150</span>        <span class="comment">"""</span></div>
+                    <div class="code-line"><span class="line-number">151</span>        <span class="comment">Outer product (external product) of two vectors.</span></div>
+                    <div class="code-line"><span class="line-number">165</span>        <span class="keyword">if</span> self.ndim != 1 <span class="keyword">or</span> other.ndim != 1:</div>
+                    <div class="code-line"><span class="line-number">166</span>            <span class="keyword">raise</span> ValueError(<span class="string">"Outer product is only defined for 1D vectors"</span>)</div>
+                    <div class="code-line"><span class="line-number">168</span>        <span class="keyword">return</span> <span class="highlight">Vector(np.outer(self.data, other.data))</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Vector Operations:</h4>
+                    <ul>
+                        <li><strong>Dot product</strong> (line 124): Scalar result for 1D vectors</li>
+                        <li><strong>Matrix multiplication</strong> (lines 127-144): For 2D matrices</li>
+                        <li><strong>Outer product</strong> (line 168): Tensor product of two vectors</li>
+                        <li><strong>Element-wise operations</strong>: Addition and Hadamard product</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Matrix Operations -->
+            <section id="matrix-operations" class="algorithm-section">
+                <h2>Matrix Operations <span class="algorithm-type linalg">Linear Algebra</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Matrix Multiplication</span>
+                    <p>For matrices $\mathbf{A}$ (m×n) and $\mathbf{B}$ (n×p):</p>
+                    <p>$$(\mathbf{A}\mathbf{B})_{ij} = \sum_{k=1}^{n} A_{ik} B_{kj}$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linalg.py - Matrix Multiplication</div>
+                    <div class="code-line"><span class="line-number">126</span>        <span class="comment"># Matrix multiplication (2D)</span></div>
+                    <div class="code-line"><span class="line-number">127</span>        <span class="keyword">elif</span> self.ndim == 2 <span class="keyword">and</span> other.ndim == 2:</div>
+                    <div class="code-line"><span class="line-number">128</span>            <span class="keyword">if</span> self.shape[1] != other.shape[0]:</div>
+                    <div class="code-line"><span class="line-number">129</span>                <span class="keyword">raise</span> ValueError(</div>
+                    <div class="code-line"><span class="line-number">130</span>                    <span class="string">f"Matrix shapes {self.shape} and {other.shape} are incompatible"</span></div>
+                    <div class="code-line"><span class="line-number">133</span>            <span class="keyword">return</span> <span class="highlight">Vector(np.dot(self.data, other.data))</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Matrix Operations:</h4>
+                    <ul>
+                        <li><strong>Matrix multiplication</strong> (line 133): Standard matrix product</li>
+                        <li><strong>Vector-matrix multiplication</strong> (lines 136-144): Handles mixed dimensions</li>
+                        <li><strong>Shape validation</strong>: Ensures compatible dimensions</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Norms -->
+            <section id="norms" class="algorithm-section">
+                <h2>Vector & Matrix Norms <span class="algorithm-type linalg">Linear Algebra</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">L1 Norm (Manhattan)</span>
+                    <p>$$\|\mathbf{x}\|_1 = \sum_{i=1}^{n} |x_i|$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linalg.py - L1 Norm</div>
+                    <div class="code-line"><span class="line-number">193</span>            <span class="keyword">if</span> p == 1:</div>
+                    <div class="code-line"><span class="line-number">194</span>                <span class="keyword">return</span> <span class="highlight">float(np.linalg.norm(self.data, ord=1))</span></div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">L2 Norm (Euclidean)</span>
+                    <p>$$\|\mathbf{x}\|_2 = \sqrt{\sum_{i=1}^{n} x_i^2}$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linalg.py - L2 Norm</div>
+                    <div class="code-line"><span class="line-number">195</span>            <span class="keyword">elif</span> p == 2:</div>
+                    <div class="code-line"><span class="line-number">196</span>                <span class="keyword">return</span> <span class="highlight">float(np.linalg.norm(self.data, ord=2))</span></div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Infinity Norm</span>
+                    <p>$$\|\mathbf{x}\|_\infty = \max_i |x_i|$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linalg.py - Infinity Norm</div>
+                    <div class="code-line"><span class="line-number">197</span>            <span class="keyword">elif</span> p <span class="keyword">in</span> (<span class="string">'inf'</span>, <span class="string">'infinity'</span>):</div>
+                    <div class="code-line"><span class="line-number">198</span>                <span class="keyword">return</span> <span class="highlight">float(np.linalg.norm(self.data, ord=np.inf))</span></div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Frobenius Norm (for matrices)</span>
+                    <p>$$\|\mathbf{A}\|_F = \sqrt{\sum_{i=1}^{m} \sum_{j=1}^{n} A_{ij}^2}$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linalg.py - Frobenius Norm</div>
+                    <div class="code-line"><span class="line-number">207</span>            <span class="keyword">if</span> p == <span class="string">'fro'</span>:</div>
+                    <div class="code-line"><span class="line-number">208</span>                <span class="keyword">return</span> <span class="highlight">float(np.linalg.norm(self.data, ord='fro'))</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Available Norms:</h4>
+                    <ul>
+                        <li><strong>L1 norm</strong> (line 194): Sum of absolute values</li>
+                        <li><strong>L2 norm</strong> (line 196): Euclidean distance</li>
+                        <li><strong>Infinity norm</strong> (line 198): Maximum absolute value</li>
+                        <li><strong>Frobenius norm</strong> (line 208): For matrices, square root of sum of squares</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Eigendecomposition -->
+            <section id="eigendecomposition" class="algorithm-section">
+                <h2>Eigendecomposition <span class="algorithm-type linalg">Linear Algebra</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Eigenvalue Decomposition</span>
+                    <p>For a square matrix $\mathbf{A}$:</p>
+                    <p>$$\mathbf{A}\mathbf{v}_i = \lambda_i \mathbf{v}_i$$</p>
+                    <p>where $\lambda_i$ are eigenvalues and $\mathbf{v}_i$ are eigenvectors</p>
+                    <p><strong>Matrix form:</strong></p>
+                    <p>$$\mathbf{A} = \mathbf{V}\boldsymbol{\Lambda}\mathbf{V}^{-1}$$</p>
+                    <p>where $\mathbf{V}$ contains eigenvectors as columns and $\boldsymbol{\Lambda}$ is diagonal with eigenvalues</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linalg.py - Eigendecomposition</div>
+                    <div class="code-line"><span class="line-number">264</span>    <span class="keyword">def</span> <span class="function">eig</span>(self) -> EigenDecomposition:</div>
+                    <div class="code-line"><span class="line-number">265</span>        <span class="comment">"""</span></div>
+                    <div class="code-line"><span class="line-number">266</span>        <span class="comment">Compute the eigenvalue decomposition of a square matrix.</span></div>
+                    <div class="code-line"><span class="line-number">268</span>        <span class="comment">For a matrix A, finds eigenvalues λ and eigenvectors v such that:</span></div>
+                    <div class="code-line"><span class="line-number">269</span>        <span class="comment">A @ v = λ * v</span></div>
+                    <div class="code-line"><span class="line-number">279</span>        <span class="keyword">if</span> self.ndim != 2:</div>
+                    <div class="code-line"><span class="line-number">280</span>            <span class="keyword">raise</span> ValueError(<span class="string">"Eigenvalue decomposition is only defined for 2D matrices"</span>)</div>
+                    <div class="code-line"><span class="line-number">282</span>        <span class="keyword">if</span> self.shape[0] != self.shape[1]:</div>
+                    <div class="code-line"><span class="line-number">283</span>            <span class="keyword">raise</span> ValueError(<span class="string">f"Matrix must be square for eigendecomposition. Got shape {self.shape}"</span>)</div>
+                    <div class="code-line"><span class="line-number">285</span>        eigenvalues, eigenvectors = <span class="highlight">np.linalg.eig(self.data)</span></div>
+                    <div class="code-line"><span class="line-number">287</span>        <span class="keyword">return</span> EigenDecomposition(</div>
+                    <div class="code-line"><span class="line-number">288</span>            eigenvalues=eigenvalues,</div>
+                    <div class="code-line"><span class="line-number">289</span>            eigenvectors=eigenvectors</div>
+                    <div class="code-line"><span class="line-number">290</span>        )</div>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linalg.py - Eigenvalues Only</div>
+                    <div class="code-line"><span class="line-number">292</span>    <span class="keyword">def</span> <span class="function">eigvals</span>(self) -> np.ndarray:</div>
+                    <div class="code-line"><span class="line-number">293</span>        <span class="comment">"""</span></div>
+                    <div class="code-line"><span class="line-number">294</span>        <span class="comment">Compute only the eigenvalues of a square matrix.</span></div>
+                    <div class="code-line"><span class="line-number">295</span>        <span class="comment">More efficient than eig() if you only need eigenvalues.</span></div>
+                    <div class="code-line"><span class="line-number">310</span>        <span class="keyword">return</span> <span class="highlight">np.linalg.eigvals(self.data)</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Details:</h4>
+                    <ul>
+                        <li><strong>Eigendecomposition</strong> (line 285): Computes both eigenvalues and eigenvectors</li>
+                        <li><strong>Eigenvalues only</strong> (line 310): More efficient when eigenvectors not needed</li>
+                        <li><strong>Square matrix requirement</strong> (lines 282-283): Only defined for square matrices</li>
+                        <li><strong>Return format</strong>: Named tuple with eigenvalues and eigenvectors arrays</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+</html>

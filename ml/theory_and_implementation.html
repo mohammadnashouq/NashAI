@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Algorithms: Theory & Implementation</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            padding: 30px 40px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .toc h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .toc ul {
+            list-style: none;
+            columns: 2;
+            column-gap: 30px;
+        }
+
+        .toc li {
+            margin: 10px 0;
+            break-inside: avoid;
+        }
+
+        .toc a {
+            color: #495057;
+            text-decoration: none;
+            font-size: 1.1em;
+            transition: color 0.3s;
+            display: block;
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        .toc a:hover {
+            color: #667eea;
+            background: #e9ecef;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .algorithm-section {
+            margin-bottom: 60px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+
+        .algorithm-section h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .algorithm-section h3 {
+            color: #495057;
+            font-size: 1.5em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        .algorithm-section h4 {
+            color: #667eea;
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .math-formula {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #dee2e6;
+            overflow-x: auto;
+        }
+
+        .math-formula .formula-label {
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .visual-diagram {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #dee2e6;
+            text-align: center;
+        }
+
+        .code-snippet {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .code-snippet .code-header {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 10px 15px;
+            margin: -20px -20px 15px -20px;
+            border-radius: 8px 8px 0 0;
+            font-size: 0.85em;
+            border-bottom: 1px solid #3e3e3e;
+        }
+
+        .code-snippet .line-number {
+            color: #858585;
+            margin-right: 15px;
+            user-select: none;
+        }
+
+        .code-snippet .code-line {
+            display: block;
+            padding: 2px 0;
+        }
+
+        .code-snippet .highlight {
+            background: rgba(255, 255, 0, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .code-snippet .comment {
+            color: #6a9955;
+        }
+
+        .code-snippet .keyword {
+            color: #569cd6;
+        }
+
+        .code-snippet .string {
+            color: #ce9178;
+        }
+
+        .code-snippet .function {
+            color: #dcdcaa;
+        }
+
+        .theory-code-link {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .theory-code-link strong {
+            color: #856404;
+        }
+
+        .key-points {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2196F3;
+        }
+
+        .key-points ul {
+            margin-left: 20px;
+        }
+
+        .key-points li {
+            margin: 10px 0;
+        }
+
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .algorithm-type {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .supervised { background: #28a745; }
+        .unsupervised { background: #ffc107; color: #333; }
+        .dimensionality { background: #17a2b8; }
+
+        .step-box {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .step-box .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Machine Learning Algorithms</h1>
+            <p>Theoretical Foundations & Implementation Mapping</p>
+        </header>
+
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#linear-regression">Linear Regression</a></li>
+                <li><a href="#logistic-regression">Logistic Regression</a></li>
+                <li><a href="#knn">k-Nearest Neighbors</a></li>
+                <li><a href="#naive-bayes">Naive Bayes</a></li>
+                <li><a href="#svm">Support Vector Machine</a></li>
+                <li><a href="#decision-tree">Decision Trees</a></li>
+                <li><a href="#random-forest">Random Forest</a></li>
+                <li><a href="#kmeans">K-Means Clustering</a></li>
+                <li><a href="#gmm">Gaussian Mixture Model</a></li>
+                <li><a href="#pca">Principal Component Analysis</a></li>
+                <li><a href="#ica">Independent Component Analysis</a></li>
+            </ul>
+        </div>
+
+        <div class="content">
+            <!-- Linear Regression -->
+            <section id="linear-regression" class="algorithm-section">
+                <h2>Linear Regression <span class="algorithm-type supervised">Supervised</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Model Equation</span>
+                    <p><strong>Model:</strong> $y = \mathbf{X}\mathbf{w} + b + \epsilon$</p>
+                    <p>where $\mathbf{X}$ is the feature matrix, $\mathbf{w}$ are weights, $b$ is bias, and $\epsilon$ is error.</p>
+                </div>
+
+                <div class="theory-code-link">
+                    <strong>📝 Theory → Code:</strong> This model is implemented in the <code>predict</code> method (line 143): <code>return X @ self.coef_ + self.intercept_</code>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Objective Function</span>
+                    <p><strong>Objective:</strong> Minimize Mean Squared Error (MSE)</p>
+                    <p>$$L(\mathbf{w}, b) = \frac{1}{n}\sum_{i=1}^{n}(y_i - (\mathbf{x}_i^T\mathbf{w} + b))^2$$</p>
+                </div>
+
+                <div class="theory-code-link">
+                    <strong>📝 Theory → Code:</strong> MSE is computed in the cost function (lines 92-97) for gradient descent method.
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Normal Equation Solution</span>
+                    <p><strong>Normal Equation:</strong></p>
+                    <p>$$\mathbf{w} = (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linear_models.py - Normal Equation Implementation</div>
+                    <div class="code-line"><span class="line-number">66</span><span class="comment"># Normal equation: w = (X^T @ X)^(-1) @ X^T @ y</span></div>
+                    <div class="code-line"><span class="line-number">67</span><span class="comment"># Using pseudo-inverse for numerical stability</span></div>
+                    <div class="code-line"><span class="line-number">68</span><span class="keyword">try</span>:</div>
+                    <div class="code-line"><span class="line-number">69</span>    <span class="highlight">coef = np.linalg.solve(X_aug.T @ X_aug, X_aug.T @ y)</span></div>
+                    <div class="code-line"><span class="line-number">70</span><span class="keyword">except</span> np.linalg.LinAlgError:</div>
+                    <div class="code-line"><span class="line-number">71</span>    <span class="comment"># Use pseudo-inverse if singular</span></div>
+                    <div class="code-line"><span class="line-number">72</span>    <span class="highlight">coef = np.linalg.pinv(X_aug) @ y</span></div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Gradient Descent Update</span>
+                    <p><strong>Gradient Descent:</strong></p>
+                    <p>$$\mathbf{w}_{t+1} = \mathbf{w}_t - \alpha \nabla_{\mathbf{w}} L$$</p>
+                    <p>where $\nabla_{\mathbf{w}} L = -\frac{2}{n}\mathbf{X}^T(\mathbf{y} - \mathbf{X}\mathbf{w})$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linear_models.py - Gradient Descent Implementation</div>
+                    <div class="code-line"><span class="line-number">91</span><span class="comment"># Cost function: MSE</span></div>
+                    <div class="code-line"><span class="line-number">92</span><span class="keyword">def</span> <span class="function">cost</span>(params):</div>
+                    <div class="code-line"><span class="line-number">93</span>    <span class="keyword">if</span> self.fit_intercept:</div>
+                    <div class="code-line"><span class="line-number">94</span>        predictions = X @ params[1:] + params[0]</div>
+                    <div class="code-line"><span class="line-number">95</span>    <span class="keyword">else</span>:</div>
+                    <div class="code-line"><span class="line-number">96</span>        predictions = X @ params</div>
+                    <div class="code-line"><span class="line-number">97</span>    <span class="highlight">return np.mean((predictions - y) ** 2)</span>  <span class="comment"># MSE</span></div>
+                    <div class="code-line"><span class="line-number">99</span><span class="comment"># Gradient</span></div>
+                    <div class="code-line"><span class="line-number">100</span><span class="keyword">def</span> <span class="function">gradient</span>(params):</div>
+                    <div class="code-line"><span class="line-number">101</span>    <span class="keyword">if</span> self.fit_intercept:</div>
+                    <div class="code-line"><span class="line-number">102</span>        predictions = X @ params[1:] + params[0]</div>
+                    <div class="code-line"><span class="line-number">103</span>        errors = predictions - y</div>
+                    <div class="code-line"><span class="line-number">104</span>        grad_b = <span class="highlight">2 * np.mean(errors)</span></div>
+                    <div class="code-line"><span class="line-number">105</span>        grad_w = <span class="highlight">2 * np.mean(errors[:, np.newaxis] * X, axis=0)</span></div>
+                    <div class="code-line"><span class="line-number">106</span>        <span class="keyword">return</span> np.concatenate([[grad_b], grad_w])</div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Steps:</h4>
+                    <ol>
+                        <li><strong>Augment feature matrix</strong> (lines 60-64): Add column of ones for intercept term</li>
+                        <li><strong>Normal equation</strong> (lines 66-73): Solve $\mathbf{w} = (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}$</li>
+                        <li><strong>Gradient descent</strong> (lines 82-120): Iteratively minimize MSE using gradient updates</li>
+                        <li><strong>Prediction</strong> (line 143): Apply learned weights: $y = \mathbf{X}\mathbf{w} + b$</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Logistic Regression -->
+            <section id="logistic-regression" class="algorithm-section">
+                <h2>Logistic Regression <span class="algorithm-type supervised">Supervised</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Sigmoid Function</span>
+                    <p>$$\sigma(z) = \frac{1}{1 + e^{-z}} = \frac{e^z}{1 + e^z}$$</p>
+                    <p>where $z = \mathbf{x}^T\mathbf{w} + b$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linear_models.py - Sigmoid Implementation</div>
+                    <div class="code-line"><span class="line-number">177</span><span class="keyword">def</span> <span class="function">_sigmoid</span>(self, z: np.ndarray) -> np.ndarray:</div>
+                    <div class="code-line"><span class="line-number">178</span>    <span class="comment">"""Sigmoid activation function."""</span></div>
+                    <div class="code-line"><span class="line-number">179</span>    <span class="comment"># Clip to avoid overflow</span></div>
+                    <div class="code-line"><span class="line-number">180</span>    z = <span class="highlight">np.clip(z, -500, 500)</span></div>
+                    <div class="code-line"><span class="line-number">181</span>    <span class="keyword">return</span> <span class="highlight">1 / (1 + np.exp(-z))</span>  <span class="comment"># σ(z) = 1/(1+e^(-z))</span></div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Cross-Entropy Loss</span>
+                    <p>$$L(\mathbf{w}, b) = -\frac{1}{n}\sum_{i=1}^{n}[y_i\log(\hat{y}_i) + (1-y_i)\log(1-\hat{y}_i)]$$</p>
+                    <p>where $\hat{y}_i = \sigma(\mathbf{x}_i^T\mathbf{w} + b)$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linear_models.py - Loss Computation</div>
+                    <div class="code-line"><span class="line-number">210</span><span class="comment"># Forward pass</span></div>
+                    <div class="code-line"><span class="line-number">211</span>z = X @ w + b</div>
+                    <div class="code-line"><span class="line-number">212</span>predictions = self._sigmoid(z)</div>
+                    <div class="code-line"><span class="line-number">214</span><span class="comment"># Compute loss (cross-entropy)</span></div>
+                    <div class="code-line"><span class="line-number">215</span>loss = <span class="highlight">-np.mean(y * np.log(predictions + 1e-15) + (1 - y) * np.log(1 - predictions + 1e-15))</span></div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Gradient</span>
+                    <p>$$\frac{\partial L}{\partial \mathbf{w}} = \frac{1}{n}\mathbf{X}^T(\hat{\mathbf{y}} - \mathbf{y})$$</p>
+                    <p>$$\frac{\partial L}{\partial b} = \frac{1}{n}\sum_{i=1}^{n}(\hat{y}_i - y_i)$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linear_models.py - Gradient Computation</div>
+                    <div class="code-line"><span class="line-number">224</span><span class="comment"># Compute gradients</span></div>
+                    <div class="code-line"><span class="line-number">225</span>errors = predictions - y</div>
+                    <div class="code-line"><span class="line-number">226</span>grad_w = <span class="highlight">np.mean(errors[:, np.newaxis] * X, axis=0)</span>  <span class="comment"># ∂L/∂w</span></div>
+                    <div class="code-line"><span class="line-number">227</span>grad_b = <span class="highlight">np.mean(errors)</span> <span class="keyword">if</span> self.fit_intercept <span class="keyword">else</span> 0.0  <span class="comment"># ∂L/∂b</span></div>
+                    <div class="code-line"><span class="line-number">229</span><span class="comment"># Update weights</span></div>
+                    <div class="code-line"><span class="line-number">230</span>w -= self.learning_rate * grad_w</div>
+                    <div class="code-line"><span class="line-number">231</span><span class="keyword">if</span> self.fit_intercept:</div>
+                    <div class="code-line"><span class="line-number">232</span>    b -= self.learning_rate * grad_b</div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Steps:</h4>
+                    <ol>
+                        <li><strong>Sigmoid function</strong> (lines 177-181): Maps $z$ to probability $[0,1]$</li>
+                        <li><strong>Forward pass</strong> (lines 211-212): Compute $z = \mathbf{X}\mathbf{w} + b$ and $\hat{y} = \sigma(z)$</li>
+                        <li><strong>Loss computation</strong> (line 215): Cross-entropy loss</li>
+                        <li><strong>Gradient computation</strong> (lines 225-227): Gradients for weight updates</li>
+                        <li><strong>Weight update</strong> (lines 230-232): Gradient descent step</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- k-NN -->
+            <section id="knn" class="algorithm-section">
+                <h2>k-Nearest Neighbors <span class="algorithm-type supervised">Supervised</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Distance Metrics</span>
+                    <p><strong>Euclidean:</strong> $d(\mathbf{x}_i, \mathbf{x}_j) = \sqrt{\sum_{k=1}^{d}(x_{ik} - x_{jk})^2}$</p>
+                    <p><strong>Manhattan:</strong> $d(\mathbf{x}_i, \mathbf{x}_j) = \sum_{k=1}^{d}|x_{ik} - x_{jk}|$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linear_models.py - Distance Computation</div>
+                    <div class="code-line"><span class="line-number">293</span><span class="keyword">def</span> <span class="function">_distance</span>(self, x1: np.ndarray, x2: np.ndarray) -> float:</div>
+                    <div class="code-line"><span class="line-number">294</span>    <span class="comment">"""Compute distance between two points."""</span></div>
+                    <div class="code-line"><span class="line-number">295</span>    <span class="keyword">if</span> self.metric == <span class="string">'euclidean'</span>:</div>
+                    <div class="code-line"><span class="line-number">296</span>        <span class="keyword">return</span> <span class="highlight">np.sqrt(np.sum((x1 - x2) ** 2))</span>  <span class="comment"># Euclidean distance</span></div>
+                    <div class="code-line"><span class="line-number">297</span>    <span class="keyword">elif</span> self.metric == <span class="string">'manhattan'</span>:</div>
+                    <div class="code-line"><span class="line-number">298</span>        <span class="keyword">return</span> <span class="highlight">np.sum(np.abs(x1 - x2))</span>  <span class="comment"># Manhattan distance</span></div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Prediction Rule</span>
+                    <p>$$\hat{y} = \text{mode}(\{y_i : \mathbf{x}_i \in N_k(\mathbf{x})\})$$</p>
+                    <p>where $N_k(\mathbf{x})$ is the set of $k$ nearest neighbors to $\mathbf{x}$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linear_models.py - k-NN Prediction</div>
+                    <div class="code-line"><span class="line-number">337</span><span class="keyword">for</span> x <span class="keyword">in</span> X:</div>
+                    <div class="code-line"><span class="line-number">338</span>    <span class="comment"># Compute distances to all training points</span></div>
+                    <div class="code-line"><span class="line-number">339</span>    distances = [<span class="highlight">self._distance(x, x_train)</span> <span class="keyword">for</span> x_train <span class="keyword">in</span> self.X_train]</div>
+                    <div class="code-line"><span class="line-number">341</span>    <span class="comment"># Get k nearest neighbors</span></div>
+                    <div class="code-line"><span class="line-number">342</span>    k_indices = <span class="highlight">np.argsort(distances)[:self.n_neighbors]</span></div>
+                    <div class="code-line"><span class="line-number">343</span>    k_labels = self.y_train[k_indices]</div>
+                    <div class="code-line"><span class="line-number">345</span>    <span class="comment"># Majority vote</span></div>
+                    <div class="code-line"><span class="line-number">346</span>    unique_labels, counts = np.unique(k_labels, return_counts=True)</div>
+                    <div class="code-line"><span class="line-number">347</span>    prediction = <span class="highlight">unique_labels[np.argmax(counts)]</span>  <span class="comment"># Mode</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Steps:</h4>
+                    <ol>
+                        <li><strong>Distance computation</strong> (lines 293-300): Calculate distance to all training points</li>
+                        <li><strong>Find k nearest</strong> (line 342): Sort distances and select k smallest</li>
+                        <li><strong>Majority vote</strong> (lines 346-347): Return most common label among k neighbors</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Naive Bayes -->
+            <section id="naive-bayes" class="algorithm-section">
+                <h2>Naive Bayes <span class="algorithm-type supervised">Supervised</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Bayes' Theorem</span>
+                    <p>$$P(y|\mathbf{x}) = \frac{P(\mathbf{x}|y)P(y)}{P(\mathbf{x})}$$</p>
+                    <p><strong>Naive Assumption:</strong> $P(\mathbf{x}|y) = \prod_{i=1}^{d} P(x_i|y)$</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Gaussian PDF</span>
+                    <p>$$P(x_i|y) = \frac{1}{\sqrt{2\pi\sigma_{yi}^2}} \exp\left(-\frac{(x_i - \mu_{yi})^2}{2\sigma_{yi}^2}\right)$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linear_models.py - Gaussian PDF</div>
+                    <div class="code-line"><span class="line-number">405</span><span class="keyword">def</span> <span class="function">_gaussian_pdf</span>(self, x: np.ndarray, mean: np.ndarray, std: np.ndarray) -> float:</div>
+                    <div class="code-line"><span class="line-number">406</span>    <span class="comment">"""Compute Gaussian probability density."""</span></div>
+                    <div class="code-line"><span class="line-number">407</span>    exponent = <span class="highlight">-0.5 * np.sum(((x - mean) / std) ** 2)</span></div>
+                    <div class="code-line"><span class="line-number">408</span>    normalization = <span class="highlight">1.0 / (np.sqrt(2 * np.pi) * np.prod(std))</span></div>
+                    <div class="code-line"><span class="line-number">409</span>    <span class="keyword">return</span> normalization * np.exp(exponent)</div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Posterior Probability</span>
+                    <p>$$P(y|\mathbf{x}) \propto P(y) \prod_{i=1}^{d} P(x_i|y)$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linear_models.py - Prediction with Naive Bayes</div>
+                    <div class="code-line"><span class="line-number">432</span><span class="keyword">for</span> i, x <span class="keyword">in</span> enumerate(X):</div>
+                    <div class="code-line"><span class="line-number">433</span>    <span class="keyword">for</span> j, c <span class="keyword">in</span> enumerate(self.classes_):</div>
+                    <div class="code-line"><span class="line-number">434</span>        <span class="comment"># Compute likelihood using Naive Bayes assumption</span></div>
+                    <div class="code-line"><span class="line-number">435</span>        likelihood = <span class="highlight">self._gaussian_pdf(x, self.means_[j], self.stds_[j])</span></div>
+                    <div class="code-line"><span class="line-number">436</span>        <span class="comment"># Posterior = prior * likelihood (unnormalized)</span></div>
+                    <div class="code-line"><span class="line-number">437</span>        probabilities[i, j] = <span class="highlight">self.class_priors_[j] * likelihood</span></div>
+                    <div class="code-line"><span class="line-number">439</span>    <span class="comment"># Normalize probabilities</span></div>
+                    <div class="code-line"><span class="line-number">440</span>    probabilities = probabilities / probabilities.sum(axis=1, keepdims=True)</div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Steps:</h4>
+                    <ol>
+                        <li><strong>Fit: Compute statistics</strong> (lines 392-401): Calculate mean, std, and priors for each class</li>
+                        <li><strong>Gaussian PDF</strong> (lines 405-409): Compute $P(x_i|y)$ using Gaussian distribution</li>
+                        <li><strong>Posterior computation</strong> (lines 435-437): $P(y|\mathbf{x}) \propto P(y) \prod P(x_i|y)$</li>
+                        <li><strong>Normalization</strong> (line 440): Ensure probabilities sum to 1</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- SVM -->
+            <section id="svm" class="algorithm-section">
+                <h2>Support Vector Machine <span class="algorithm-type supervised">Supervised</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Hinge Loss</span>
+                    <p>$$L_{\text{hinge}}(y, f(\mathbf{x})) = \max(0, 1 - y \cdot f(\mathbf{x}))$$</p>
+                    <p>where $f(\mathbf{x}) = \mathbf{w}^T\mathbf{x} + b$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linear_models.py - Hinge Loss</div>
+                    <div class="code-line"><span class="line-number">517</span><span class="keyword">for</span> iteration <span class="keyword">in</span> range(self.max_iterations):</div>
+                    <div class="code-line"><span class="line-number">518</span>    <span class="comment"># Compute margin: y * (X @ w + b)</span></div>
+                    <div class="code-line"><span class="line-number">519</span>    margins = <span class="highlight">y * (X @ w + b)</span></div>
+                    <div class="code-line"><span class="line-number">521</span>    <span class="comment"># Hinge loss: max(0, 1 - margin)</span></div>
+                    <div class="code-line"><span class="line-number">522</span>    hinge_loss = <span class="highlight">np.maximum(0, 1 - margins)</span></div>
+                    <div class="code-line"><span class="line-number">523</span>    loss = np.mean(hinge_loss) + (1 / (2 * self.C)) * np.sum(w ** 2)</div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Gradient</span>
+                    <p>$$\frac{\partial L}{\partial \mathbf{w}} = -\frac{1}{n}\sum_{i: y_i f(\mathbf{x}_i) < 1} y_i \mathbf{x}_i + \frac{1}{C}\mathbf{w}$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">linear_models.py - Gradient Computation</div>
+                    <div class="code-line"><span class="line-number">531</span><span class="comment"># Compute gradients</span></div>
+                    <div class="code-line"><span class="line-number">532</span>    <span class="comment"># For samples with margin < 1, gradient is -y * X</span></div>
+                    <div class="code-line"><span class="line-number">533</span>    mask = <span class="highlight">margins < 1</span>  <span class="comment"># Only misclassified points contribute</span></div>
+                    <div class="code-line"><span class="line-number">534</span>    grad_w = np.zeros(n_features)</div>
+                    <div class="code-line"><span class="line-number">535</span>    grad_b = 0.0</div>
+                    <div class="code-line"><span class="line-number">537</span>    <span class="keyword">if</span> np.any(mask):</div>
+                    <div class="code-line"><span class="line-number">538</span>        grad_w = <span class="highlight">-np.mean(y[mask, np.newaxis] * X[mask], axis=0)</span></div>
+                    <div class="code-line"><span class="line-number">539</span>        grad_b = <span class="highlight">-np.mean(y[mask])</span></div>
+                    <div class="code-line"><span class="line-number">541</span>    <span class="comment"># Add regularization gradient</span></div>
+                    <div class="code-line"><span class="line-number">542</span>    grad_w += <span class="highlight">(1 / self.C) * w</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Steps:</h4>
+                    <ol>
+                        <li><strong>Compute margins</strong> (line 519): $y \cdot (\mathbf{X}\mathbf{w} + b)$</li>
+                        <li><strong>Hinge loss</strong> (line 522): $\max(0, 1 - \text{margin})$</li>
+                        <li><strong>Gradient for misclassified</strong> (lines 533-539): Only points with margin < 1 contribute</li>
+                        <li><strong>Regularization</strong> (line 542): Add L2 regularization term</li>
+                        <li><strong>Weight update</strong> (lines 545-546): Gradient descent step</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Decision Trees -->
+            <section id="decision-tree" class="algorithm-section">
+                <h2>Decision Trees <span class="algorithm-type supervised">Supervised</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Gini Impurity</span>
+                    <p>$$Gini(D) = 1 - \sum_{i=1}^{c} p_i^2$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">trees.py - Gini Impurity</div>
+                    <div class="code-line"><span class="line-number">42</span><span class="keyword">def</span> <span class="function">_gini</span>(self, y: np.ndarray) -> float:</div>
+                    <div class="code-line"><span class="line-number">43</span>    <span class="comment">"""Compute Gini impurity."""</span></div>
+                    <div class="code-line"><span class="line-number">44</span>    <span class="keyword">if</span> len(y) == 0:</div>
+                    <div class="code-line"><span class="line-number">45</span>        <span class="keyword">return</span> 0.0</div>
+                    <div class="code-line"><span class="line-number">46</span>    counts = np.bincount(y)</div>
+                    <div class="code-line"><span class="line-number">47</span>    proportions = counts / len(y)</div>
+                    <div class="code-line"><span class="line-number">48</span>    <span class="keyword">return</span> <span class="highlight">1.0 - np.sum(proportions ** 2)</span>  <span class="comment"># Gini = 1 - Σp²</span></div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Information Gain</span>
+                    <p>$$IG(D, A) = H(D) - \sum_{v \in \text{Values}(A)} \frac{|D_v|}{|D|} H(D_v)$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">trees.py - Best Split Selection</div>
+                    <div class="code-line"><span class="line-number">78</span>    n_features = X.shape[1]</div>
+                    <div class="code-line"><span class="line-number">79</span>    parent_impurity = self._impurity(y)  <span class="comment"># H(D)</span></div>
+                    <div class="code-line"><span class="line-number">81</span>    <span class="keyword">for</span> feature_idx <span class="keyword">in</span> range(n_features):</div>
+                    <div class="code-line"><span class="line-number">86</span>        threshold = (feature_values[i] + feature_values[i + 1]) / 2</div>
+                    <div class="code-line"><span class="line-number">98</span>        left_impurity = self._impurity(y[left_mask])  <span class="comment"># H(D_left)</span></div>
+                    <div class="code-line"><span class="line-number">99</span>        right_impurity = self._impurity(y[right_mask])  <span class="comment"># H(D_right)</span></div>
+                    <div class="code-line"><span class="line-number">105</span>        weighted_impurity = (n_left / n_total) * left_impurity + (n_right / n_total) * right_impurity</div>
+                    <div class="code-line"><span class="line-number">108</span>        <span class="comment"># Information gain</span></div>
+                    <div class="code-line"><span class="line-number">109</span>        gain = <span class="highlight">parent_impurity - weighted_impurity</span>  <span class="comment"># IG = H(D) - weighted_H</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Steps:</h4>
+                    <ol>
+                        <li><strong>Compute impurity</strong> (lines 42-48): Gini or Entropy for current node</li>
+                        <li><strong>Find best split</strong> (lines 67-116): Try all features and thresholds, maximize information gain</li>
+                        <li><strong>Recursive tree building</strong> (lines 118-167): Split data and recursively build subtrees</li>
+                        <li><strong>Prediction</strong> (lines 186-194): Traverse tree to leaf node</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Random Forest -->
+            <section id="random-forest" class="algorithm-section">
+                <h2>Random Forest <span class="algorithm-type supervised">Supervised</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Bootstrap Sampling</span>
+                    <p>Each tree trained on $D_b$ where samples drawn with replacement</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">trees.py - Bootstrap Sampling</div>
+                    <div class="code-line"><span class="line-number">418</span><span class="keyword">def</span> <span class="function">_bootstrap_sample</span>(self, X: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:</div>
+                    <div class="code-line"><span class="line-number">419</span>    <span class="comment">"""Generate a bootstrap sample."""</span></div>
+                    <div class="code-line"><span class="line-number">420</span>    n_samples = len(X)</div>
+                    <div class="code-line"><span class="line-number">421</span>    indices = <span class="highlight">np.random.choice(n_samples, size=n_samples, replace=True)</span></div>
+                    <div class="code-line"><span class="line-number">422</span>    <span class="keyword">return</span> X[indices], y[indices]</div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Ensemble Prediction</span>
+                    <p>$$\hat{y} = \text{mode}(\{\hat{y}_1, \hat{y}_2, ..., \hat{y}_B\})$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">trees.py - Majority Voting</div>
+                    <div class="code-line"><span class="line-number">505</span><span class="keyword">for</span> tree, feature_indices <span class="keyword">in</span> zip(self.trees, self.feature_indices_list):</div>
+                    <div class="code-line"><span class="line-number">507</span>    X_subset = X[:, feature_indices]</div>
+                    <div class="code-line"><span class="line-number">508</span>    predictions = tree.predict(X_subset)</div>
+                    <div class="code-line"><span class="line-number">509</span>    all_predictions.append(predictions)</div>
+                    <div class="code-line"><span class="line-number">511</span>    <span class="comment"># Majority vote</span></div>
+                    <div class="code-line"><span class="line-number">512</span>    all_predictions = np.array(all_predictions)</div>
+                    <div class="code-line"><span class="line-number">515</span>    <span class="keyword">for</span> i <span class="keyword">in</span> range(n_samples):</div>
+                    <div class="code-line"><span class="line-number">516</span>        votes = all_predictions[:, i]</div>
+                    <div class="code-line"><span class="line-number">517</span>        counts = np.bincount(votes)</div>
+                    <div class="code-line"><span class="line-number">518</span>        final_predictions.append(<span class="highlight">np.argmax(counts)</span>)  <span class="comment"># Mode</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Steps:</h4>
+                    <ol>
+                        <li><strong>Bootstrap sampling</strong> (lines 418-422): Sample with replacement for each tree</li>
+                        <li><strong>Random feature selection</strong> (lines 463-469): Select subset of features for each tree</li>
+                        <li><strong>Train trees</strong> (lines 472-481): Train each tree on bootstrap sample</li>
+                        <li><strong>Majority voting</strong> (lines 515-518): Aggregate predictions from all trees</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- K-Means -->
+            <section id="kmeans" class="algorithm-section">
+                <h2>K-Means Clustering <span class="algorithm-type unsupervised">Unsupervised</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Assignment Step</span>
+                    <p>$$r_{ik} = \begin{cases} 1 & \text{if } k = \arg\min_j \|\mathbf{x}_i - \boldsymbol{\mu}_j\|^2 \\ 0 & \text{otherwise} \end{cases}$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">clustering.py - Assignment Step</div>
+                    <div class="code-line"><span class="line-number">83</span><span class="keyword">def</span> <span class="function">_assign_clusters</span>(self, X: np.ndarray, centroids: np.ndarray) -> np.ndarray:</div>
+                    <div class="code-line"><span class="line-number">84</span>    <span class="comment">"""Assign each point to the nearest centroid."""</span></div>
+                    <div class="code-line"><span class="line-number">88</span>    <span class="keyword">for</span> i <span class="keyword">in</span> range(n_samples):</div>
+                    <div class="code-line"><span class="line-number">89</span>        distances = [<span class="highlight">np.sum((X[i] - centroid) ** 2)</span> <span class="keyword">for</span> centroid <span class="keyword">in</span> centroids]</div>
+                    <div class="code-line"><span class="line-number">90</span>        labels[i] = <span class="highlight">np.argmin(distances)</span>  <span class="comment"># Assign to nearest</span></div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Update Step</span>
+                    <p>$$\boldsymbol{\mu}_k = \frac{\sum_{i=1}^{n} r_{ik} \mathbf{x}_i}{\sum_{i=1}^{n} r_{ik}}$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">clustering.py - Update Step</div>
+                    <div class="code-line"><span class="line-number">94</span><span class="keyword">def</span> <span class="function">_update_centroids</span>(self, X: np.ndarray, labels: np.ndarray) -> np.ndarray:</div>
+                    <div class="code-line"><span class="line-number">95</span>    <span class="comment">"""Update centroids to be the mean of points in each cluster."""</span></div>
+                    <div class="code-line"><span class="line-number">99</span>    <span class="keyword">for</span> k <span class="keyword">in</span> range(self.n_clusters):</div>
+                    <div class="code-line"><span class="line-number">100</span>        cluster_points = X[labels == k]</div>
+                    <div class="code-line"><span class="line-number">101</span>        <span class="keyword">if</span> len(cluster_points) > 0:</div>
+                    <div class="code-line"><span class="line-number">102</span>            centroids[k] = <span class="highlight">np.mean(cluster_points, axis=0)</span>  <span class="comment"># μ_k = mean of cluster k</span></div>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">clustering.py - Main Loop</div>
+                    <div class="code-line"><span class="line-number">134</span><span class="keyword">for</span> iteration <span class="keyword">in</span> range(self.max_iterations):</div>
+                    <div class="code-line"><span class="line-number">135</span>    <span class="comment"># Assign points to nearest centroids</span></div>
+                    <div class="code-line"><span class="line-number">136</span>    labels = <span class="highlight">self._assign_clusters(X, centroids)</span>  <span class="comment"># E-step</span></div>
+                    <div class="code-line"><span class="line-number">138</span>    <span class="comment"># Update centroids</span></div>
+                    <div class="code-line"><span class="line-number">139</span>    new_centroids = <span class="highlight">self._update_centroids(X, labels)</span>  <span class="comment"># M-step</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Steps:</h4>
+                    <ol>
+                        <li><strong>Initialize centroids</strong> (lines 46-81): Random or k-means++ initialization</li>
+                        <li><strong>Assignment step</strong> (lines 83-92): Assign each point to nearest centroid</li>
+                        <li><strong>Update step</strong> (lines 94-107): Update centroids to cluster means</li>
+                        <li><strong>Convergence check</strong> (lines 142-148): Stop when centroids stop moving</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- GMM -->
+            <section id="gmm" class="algorithm-section">
+                <h2>Gaussian Mixture Model <span class="algorithm-type unsupervised">Unsupervised</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">E-step</span>
+                    <p>$$\gamma_{ik} = \frac{\pi_k \mathcal{N}(\mathbf{x}_i|\boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)}{\sum_{j=1}^{K} \pi_j \mathcal{N}(\mathbf{x}_i|\boldsymbol{\mu}_j, \boldsymbol{\Sigma}_j)}$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">clustering.py - E-step</div>
+                    <div class="code-line"><span class="line-number">256</span><span class="keyword">def</span> <span class="function">_expectation_step</span>(self, X: np.ndarray) -> np.ndarray:</div>
+                    <div class="code-line"><span class="line-number">266</span>    <span class="keyword">for</span> i <span class="keyword">in</span> range(n_samples):</div>
+                    <div class="code-line"><span class="line-number">267</span>        <span class="keyword">for</span> k <span class="keyword">in</span> range(self.n_components):</div>
+                    <div class="code-line"><span class="line-number">268</span>            <span class="comment"># Compute likelihood: weight * Gaussian PDF</span></div>
+                    <div class="code-line"><span class="line-number">269</span>            likelihood = <span class="highlight">self.weights_[k] * self._multivariate_gaussian_pdf(X[i], self.means_[k], self.covariances_[k])</span></div>
+                    <div class="code-line"><span class="line-number">272</span>            responsibilities[i, k] = likelihood</div>
+                    <div class="code-line"><span class="line-number">274</span>    <span class="comment"># Normalize responsibilities</span></div>
+                    <div class="code-line"><span class="line-number">277</span>    responsibilities = responsibilities / row_sums</div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">M-step</span>
+                    <p>$$\boldsymbol{\mu}_k = \frac{1}{N_k}\sum_{i=1}^{n} \gamma_{ik}\mathbf{x}_i$$</p>
+                    <p>$$\pi_k = \frac{N_k}{n}$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">clustering.py - M-step</div>
+                    <div class="code-line"><span class="line-number">285</span>    <span class="comment"># Effective number of points assigned to each component</span></div>
+                    <div class="code-line"><span class="line-number">286</span>    Nk = <span class="highlight">responsibilities.sum(axis=0)</span></div>
+                    <div class="code-line"><span class="line-number">288</span>    <span class="comment"># Update weights</span></div>
+                    <div class="code-line"><span class="line-number">289</span>    self.weights_ = <span class="highlight">Nk / n_samples</span>  <span class="comment"># π_k = N_k / n</span></div>
+                    <div class="code-line"><span class="line-number">291</span>    <span class="comment"># Update means</span></div>
+                    <div class="code-line"><span class="line-number">292</span>    <span class="keyword">for</span> k <span class="keyword">in</span> range(self.n_components):</div>
+                    <div class="code-line"><span class="line-number">293</span>        self.means_[k] = <span class="highlight">np.sum(responsibilities[:, k:k+1] * X, axis=0) / Nk[k]</span>  <span class="comment"># μ_k</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Steps:</h4>
+                    <ol>
+                        <li><strong>E-step</strong> (lines 256-279): Compute responsibilities $\gamma_{ik}$</li>
+                        <li><strong>M-step</strong> (lines 281-312): Update means, covariances, and mixing weights</li>
+                        <li><strong>EM loop</strong> (lines 345-350): Iterate until convergence</li>
+                        <li><strong>Log-likelihood</strong> (lines 314-327): Monitor convergence</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- PCA -->
+            <section id="pca" class="algorithm-section">
+                <h2>Principal Component Analysis <span class="algorithm-type dimensionality">Dimensionality Reduction</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Covariance Matrix</span>
+                    <p>$$\mathbf{C} = \frac{1}{n-1}(\mathbf{X} - \bar{\mathbf{X}})^T(\mathbf{X} - \bar{\mathbf{X}})$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">decomposition.py - Covariance Computation</div>
+                    <div class="code-line"><span class="line-number">46</span>    <span class="comment"># Center the data</span></div>
+                    <div class="code-line"><span class="line-number">47</span>    self.mean_ = np.mean(X, axis=0)</div>
+                    <div class="code-line"><span class="line-number">48</span>    X_centered = X - self.mean_</div>
+                    <div class="code-line"><span class="line-number">50</span>    <span class="comment"># Compute covariance matrix</span></div>
+                    <div class="code-line"><span class="line-number">51</span>    <span class="comment"># Using (1/(n-1)) normalization for sample covariance</span></div>
+                    <div class="code-line"><span class="line-number">52</span>    cov_matrix = <span class="highlight">(X_centered.T @ X_centered) / (n_samples - 1)</span></div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Eigendecomposition</span>
+                    <p>$$\mathbf{C} = \mathbf{V}\boldsymbol{\Lambda}\mathbf{V}^T$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">decomposition.py - Eigendecomposition</div>
+                    <div class="code-line"><span class="line-number">54</span>    <span class="comment"># Eigendecomposition</span></div>
+                    <div class="code-line"><span class="line-number">55</span>    eigenvalues, eigenvectors = <span class="highlight">np.linalg.eigh(cov_matrix)</span></div>
+                    <div class="code-line"><span class="line-number">57</span>    <span class="comment"># Sort by eigenvalues (descending order)</span></div>
+                    <div class="code-line"><span class="line-number">58</span>    idx = np.argsort(eigenvalues)[::-1]</div>
+                    <div class="code-line"><span class="line-number">59</span>    eigenvalues = eigenvalues[idx]</div>
+                    <div class="code-line"><span class="line-number">60</span>    eigenvectors = eigenvectors[:, idx]</div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Projection</span>
+                    <p>$$\mathbf{Y} = (\mathbf{X} - \bar{\mathbf{X}})\mathbf{V}_k$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">decomposition.py - Projection</div>
+                    <div class="code-line"><span class="line-number">95</span>    <span class="comment"># Center the data</span></div>
+                    <div class="code-line"><span class="line-number">96</span>    X_centered = X - self.mean_</div>
+                    <div class="code-line"><span class="line-number">98</span>    <span class="comment"># Project onto principal components</span></div>
+                    <div class="code-line"><span class="line-number">99</span>    <span class="keyword">return</span> <span class="highlight">X_centered @ self.components_.T</span>  <span class="comment"># Y = (X - X̄) @ V_k^T</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Steps:</h4>
+                    <ol>
+                        <li><strong>Center data</strong> (lines 47-48): Subtract mean from each feature</li>
+                        <li><strong>Compute covariance</strong> (line 52): $\mathbf{C} = \frac{1}{n-1}\mathbf{X}^T\mathbf{X}$</li>
+                        <li><strong>Eigendecomposition</strong> (lines 55-60): Find eigenvectors (PCs) and eigenvalues</li>
+                        <li><strong>Project</strong> (line 99): Transform data to PC space</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- ICA -->
+            <section id="ica" class="algorithm-section">
+                <h2>Independent Component Analysis <span class="algorithm-type dimensionality">Dimensionality Reduction</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Whitening</span>
+                    <p>$$\mathbf{z} = \mathbf{D}^{-1/2}\mathbf{E}^T\mathbf{x}$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">decomposition.py - Whitening</div>
+                    <div class="code-line"><span class="line-number">198</span>    <span class="comment"># Whitening matrix: D^(-1/2) @ E^T</span></div>
+                    <div class="code-line"><span class="line-number">200</span>    D_inv_sqrt = <span class="highlight">np.diag(1.0 / np.sqrt(eigenvalues + 1e-10))</span></div>
+                    <div class="code-line"><span class="line-number">201</span>    whitening_matrix = <span class="highlight">D_inv_sqrt @ eigenvectors.T</span></div>
+                    <div class="code-line"><span class="line-number">203</span>    <span class="comment"># Whiten the data</span></div>
+                    <div class="code-line"><span class="line-number">204</span>    X_whitened = <span class="highlight">X_centered @ whitening_matrix.T</span></div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">FastICA Update</span>
+                    <p>$$\mathbf{w}_{new} = E[\mathbf{x}g(\mathbf{w}^T\mathbf{x})] - E[g'(\mathbf{w}^T\mathbf{x})]\mathbf{w}$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">decomposition.py - FastICA Update</div>
+                    <div class="code-line"><span class="line-number">227</span>    <span class="keyword">for</span> iteration <span class="keyword">in</span> range(self.max_iterations):</div>
+                    <div class="code-line"><span class="line-number">228</span>        <span class="comment"># Compute w^T @ X</span></div>
+                    <div class="code-line"><span class="line-number">229</span>        wTx = X @ w</div>
+                    <div class="code-line"><span class="line-number">231</span>        <span class="comment"># Update w</span></div>
+                    <div class="code-line"><span class="line-number">232</span>        w_new = <span class="highlight">np.mean(X * self._g(wTx)[:, np.newaxis], axis=0) - np.mean(self._g_prime(wTx)) * w</span></div>
+                    <div class="code-line"><span class="line-number">234</span>        <span class="comment"># Normalize</span></div>
+                    <div class="code-line"><span class="line-number">236</span>        w_new = w_new / np.linalg.norm(w_new)</div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Steps:</h4>
+                    <ol>
+                        <li><strong>Whitening</strong> (lines 176-206): Preprocess data using PCA</li>
+                        <li><strong>FastICA iteration</strong> (lines 227-247): Update weight vector to maximize non-Gaussianity</li>
+                        <li><strong>Decorrelate</strong> (lines 238-241): Ensure components are orthogonal</li>
+                        <li><strong>Unmixing matrix</strong> (line 290): Store learned components</li>
+                    </ol>
+                </div>
+            </section>
+        </div>
+    </div>
+</body>
+</html>
