@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Networks: Theory & Implementation</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #e74c3c 0%, #9b59b6 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #e74c3c 0%, #9b59b6 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            padding: 30px 40px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .toc h2 {
+            color: #e74c3c;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .toc ul {
+            list-style: none;
+            columns: 2;
+            column-gap: 30px;
+        }
+
+        .toc li {
+            margin: 10px 0;
+            break-inside: avoid;
+        }
+
+        .toc a {
+            color: #495057;
+            text-decoration: none;
+            font-size: 1.1em;
+            transition: color 0.3s;
+            display: block;
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        .toc a:hover {
+            color: #e74c3c;
+            background: #e9ecef;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .algorithm-section {
+            margin-bottom: 60px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #e74c3c;
+        }
+
+        .algorithm-section h2 {
+            color: #e74c3c;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .algorithm-section h3 {
+            color: #495057;
+            font-size: 1.5em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        .algorithm-section h4 {
+            color: #e74c3c;
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .math-formula {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #dee2e6;
+            overflow-x: auto;
+        }
+
+        .math-formula .formula-label {
+            background: #e74c3c;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .visual-diagram {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #dee2e6;
+            text-align: center;
+        }
+
+        .code-snippet {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .code-snippet .code-header {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 10px 15px;
+            margin: -20px -20px 15px -20px;
+            border-radius: 8px 8px 0 0;
+            font-size: 0.85em;
+            border-bottom: 1px solid #3e3e3e;
+        }
+
+        .code-snippet .line-number {
+            color: #858585;
+            margin-right: 15px;
+            user-select: none;
+        }
+
+        .code-snippet .code-line {
+            display: block;
+            padding: 2px 0;
+        }
+
+        .code-snippet .highlight {
+            background: rgba(255, 255, 0, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .code-snippet .comment {
+            color: #6a9955;
+        }
+
+        .code-snippet .keyword {
+            color: #569cd6;
+        }
+
+        .code-snippet .string {
+            color: #ce9178;
+        }
+
+        .code-snippet .function {
+            color: #dcdcaa;
+        }
+
+        .theory-code-link {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .theory-code-link strong {
+            color: #856404;
+        }
+
+        .key-points {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2196F3;
+        }
+
+        .key-points ul {
+            margin-left: 20px;
+        }
+
+        .key-points li {
+            margin: 10px 0;
+        }
+
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .algorithm-type {
+            display: inline-block;
+            background: #e74c3c;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .autograd { background: #3498db; }
+        .layer { background: #2ecc71; }
+        .activation { background: #9b59b6; }
+        .loss { background: #e67e22; }
+        .optimizer { background: #1abc9c; }
+        .cnn { background: #e74c3c; }
+        .rnn { background: #f39c12; }
+        .attention { background: #8e44ad; }
+
+        .step-box {
+            background: white;
+            border: 2px solid #e74c3c;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .step-box .step-number {
+            background: #e74c3c;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .network-diagram {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            flex-wrap: wrap;
+        }
+
+        .layer-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .arrow {
+            font-size: 24px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Neural Networks from Scratch</h1>
+            <p>Theoretical Foundations & Implementation Mapping</p>
+        </header>
+
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#tensor-autograd">Tensor & Automatic Differentiation</a></li>
+                <li><a href="#dense-layer">Dense Layer</a></li>
+                <li><a href="#sequential">Sequential Container</a></li>
+                <li><a href="#conv2d">Conv2D Layer</a></li>
+                <li><a href="#pooling">Pooling Layers</a></li>
+                <li><a href="#batchnorm">Batch Normalization</a></li>
+                <li><a href="#dropout">Dropout</a></li>
+                <li><a href="#rnn">RNN / LSTM / GRU</a></li>
+                <li><a href="#attention">Scaled Dot-Product Attention</a></li>
+                <li><a href="#multihead-attention">Multi-Head Attention</a></li>
+                <li><a href="#relu">ReLU Activation</a></li>
+                <li><a href="#sigmoid">Sigmoid Activation</a></li>
+                <li><a href="#softmax">Softmax Activation</a></li>
+                <li><a href="#mse-loss">MSE Loss</a></li>
+                <li><a href="#cross-entropy">Cross-Entropy Loss</a></li>
+                <li><a href="#sgd">SGD Optimizer</a></li>
+                <li><a href="#adam">Adam Optimizer</a></li>
+                <li><a href="#rmsprop">RMSprop Optimizer</a></li>
+            </ul>
+        </div>
+
+        <div class="content">
+            <!-- Tensor & Autograd -->
+            <section id="tensor-autograd" class="algorithm-section">
+                <h2>Tensor & Automatic Differentiation <span class="algorithm-type autograd">Autograd</span></h2>
+                
+                <h3>Computational Graph</h3>
+                <p>The Tensor class builds a computational graph that tracks operations, enabling automatic gradient computation via backpropagation.</p>
+                
+                <div class="visual-diagram">
+                    <div class="network-diagram">
+                        <div class="layer-box">x (input)</div>
+                        <div class="arrow">→</div>
+                        <div class="layer-box">W @ x + b</div>
+                        <div class="arrow">→</div>
+                        <div class="layer-box">ReLU</div>
+                        <div class="arrow">→</div>
+                        <div class="layer-box">Loss</div>
+                        <div class="arrow">← backward</div>
+                    </div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Chain Rule</span>
+                    <p><strong>Backpropagation:</strong> Uses the chain rule to compute gradients</p>
+                    <p>$$\frac{\partial L}{\partial x} = \frac{\partial L}{\partial y} \cdot \frac{\partial y}{\partial x}$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">tensor.py - Backward Pass</div>
+                    <div class="code-line"><span class="line-number">80</span><span class="keyword">def</span> <span class="function">backward</span>(self, grad: Optional[np.ndarray] = None):</div>
+                    <div class="code-line"><span class="line-number">91</span>    <span class="keyword">if</span> grad <span class="keyword">is</span> None:</div>
+                    <div class="code-line"><span class="line-number">92</span>        <span class="highlight">grad = np.ones_like(self.data)</span>  <span class="comment"># Initialize with 1s</span></div>
+                    <div class="code-line"><span class="line-number">96</span>    <span class="keyword">if</span> self.grad <span class="keyword">is</span> None:</div>
+                    <div class="code-line"><span class="line-number">97</span>        self.grad = np.zeros_like(self.data)</div>
+                    <div class="code-line"><span class="line-number">99</span>    <span class="highlight">self.grad += grad</span>  <span class="comment"># Accumulate gradients</span></div>
+                    <div class="code-line"><span class="line-number">102</span>    <span class="keyword">if</span> self._backward_fn <span class="keyword">is not</span> None:</div>
+                    <div class="code-line"><span class="line-number">103</span>        child_grads = <span class="highlight">self._backward_fn(grad)</span>  <span class="comment"># Compute child gradients</span></div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Matrix Multiplication Gradient</span>
+                    <p>For $Y = A @ B$:</p>
+                    <p>$$\frac{\partial L}{\partial A} = \frac{\partial L}{\partial Y} @ B^T$$</p>
+                    <p>$$\frac{\partial L}{\partial B} = A^T @ \frac{\partial L}{\partial Y}$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">tensor.py - Matrix Multiplication Backward</div>
+                    <div class="code-line"><span class="line-number">266</span><span class="keyword">def</span> <span class="function">_backward</span>(grad):</div>
+                    <div class="code-line"><span class="line-number">267</span>    <span class="comment"># d/dA (A @ B) = grad @ B^T</span></div>
+                    <div class="code-line"><span class="line-number">268</span>    <span class="comment"># d/dB (A @ B) = A^T @ grad</span></div>
+                    <div class="code-line"><span class="line-number">269</span>    <span class="keyword">if</span> self.requires_grad:</div>
+                    <div class="code-line"><span class="line-number">270</span>        grad_self = <span class="highlight">grad @ other.data.T</span></div>
+                    <div class="code-line"><span class="line-number">274</span>    <span class="keyword">if</span> other.requires_grad:</div>
+                    <div class="code-line"><span class="line-number">275</span>        grad_other = <span class="highlight">self.data.T @ grad</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Key Features:</h4>
+                    <ul>
+                        <li><strong>Computational graph</strong>: Tracks operations and children for backpropagation</li>
+                        <li><strong>Gradient accumulation</strong>: Handles nodes used multiple times</li>
+                        <li><strong>Broadcasting support</strong>: Properly handles gradient shapes</li>
+                        <li><strong>Lazy evaluation</strong>: Gradients computed on backward() call</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Dense Layer -->
+            <section id="dense-layer" class="algorithm-section">
+                <h2>Dense Layer <span class="algorithm-type layer">Layer</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Forward Pass</span>
+                    <p>$$y = \sigma(\mathbf{x} \mathbf{W} + \mathbf{b})$$</p>
+                    <p>where $\mathbf{W} \in \mathbb{R}^{d_{in} \times d_{out}}$, $\mathbf{b} \in \mathbb{R}^{d_{out}}$, and $\sigma$ is the activation function.</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">layers.py - Forward Pass</div>
+                    <div class="code-line"><span class="line-number">58</span><span class="keyword">def</span> <span class="function">__call__</span>(self, x: Tensor) -> Tensor:</div>
+                    <div class="code-line"><span class="line-number">68</span>    <span class="comment"># Linear transformation: x @ W + b</span></div>
+                    <div class="code-line"><span class="line-number">69</span>    out = <span class="highlight">x @ self.weight</span></div>
+                    <div class="code-line"><span class="line-number">71</span>    <span class="keyword">if</span> self.use_bias:</div>
+                    <div class="code-line"><span class="line-number">73</span>        out = <span class="highlight">out + self.bias</span>  <span class="comment"># Add bias (broadcasting)</span></div>
+                    <div class="code-line"><span class="line-number">76</span>    <span class="keyword">if</span> self.activation <span class="keyword">is not</span> None:</div>
+                    <div class="code-line"><span class="line-number">77</span>        out = <span class="highlight">self.activation(out)</span></div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Xavier/Glorot Initialization</span>
+                    <p>$$W \sim U\left(-\sqrt{\frac{6}{d_{in} + d_{out}}}, \sqrt{\frac{6}{d_{in} + d_{out}}}\right)$$</p>
+                    <p>This initialization helps maintain variance across layers during forward and backward passes.</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">layers.py - Weight Initialization</div>
+                    <div class="code-line"><span class="line-number">41</span><span class="comment"># Initialize weights using Xavier/Glorot initialization</span></div>
+                    <div class="code-line"><span class="line-number">42</span><span class="comment"># W ~ U(-sqrt(6/(fan_in + fan_out)), sqrt(6/(fan_in + fan_out)))</span></div>
+                    <div class="code-line"><span class="line-number">43</span>limit = <span class="highlight">np.sqrt(6.0 / (in_features + out_features))</span></div>
+                    <div class="code-line"><span class="line-number">44</span>self.weight = Tensor(</div>
+                    <div class="code-line"><span class="line-number">45</span>    <span class="highlight">np.random.uniform(-limit, limit, (in_features, out_features))</span>,</div>
+                    <div class="code-line"><span class="line-number">46</span>    requires_grad=True</div>
+                    <div class="code-line"><span class="line-number">47</span>)</div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Steps:</h4>
+                    <ol>
+                        <li><strong>Initialize weights</strong> (lines 41-47): Xavier initialization for proper gradient flow</li>
+                        <li><strong>Initialize bias</strong> (lines 50-56): Zeros for bias terms</li>
+                        <li><strong>Forward pass</strong> (lines 68-77): Compute $y = \sigma(xW + b)$</li>
+                        <li><strong>Parameters</strong> (lines 81-86): Collect trainable parameters</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- Sequential -->
+            <section id="sequential" class="algorithm-section">
+                <h2>Sequential Container <span class="algorithm-type layer">Layer</span></h2>
+                
+                <h3>Network Architecture</h3>
+                <div class="visual-diagram">
+                    <div class="network-diagram">
+                        <div class="layer-box">Input<br>(batch, d₁)</div>
+                        <div class="arrow">→</div>
+                        <div class="layer-box">Dense₁<br>+ ReLU</div>
+                        <div class="arrow">→</div>
+                        <div class="layer-box">Dense₂<br>+ ReLU</div>
+                        <div class="arrow">→</div>
+                        <div class="layer-box">Dense₃</div>
+                        <div class="arrow">→</div>
+                        <div class="layer-box">Output<br>(batch, d₄)</div>
+                    </div>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">layers.py - Sequential Forward</div>
+                    <div class="code-line"><span class="line-number">115</span><span class="keyword">def</span> <span class="function">__call__</span>(self, x: Tensor) -> Tensor:</div>
+                    <div class="code-line"><span class="line-number">124</span>    <span class="keyword">for</span> layer <span class="keyword">in</span> self.layers:</div>
+                    <div class="code-line"><span class="line-number">125</span>        <span class="highlight">x = layer(x)</span>  <span class="comment"># Pass through each layer</span></div>
+                    <div class="code-line"><span class="line-number">126</span>    <span class="keyword">return</span> x</div>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">layers.py - Collect Parameters</div>
+                    <div class="code-line"><span class="line-number">129</span><span class="keyword">def</span> <span class="function">parameters</span>(self) -> List[Tensor]:</div>
+                    <div class="code-line"><span class="line-number">130</span>    <span class="comment">"""Get all trainable parameters from all layers."""</span></div>
+                    <div class="code-line"><span class="line-number">131</span>    params = []</div>
+                    <div class="code-line"><span class="line-number">132</span>    <span class="keyword">for</span> layer <span class="keyword">in</span> self.layers:</div>
+                    <div class="code-line"><span class="line-number">133</span>        <span class="keyword">if</span> hasattr(layer, <span class="string">'parameters'</span>):</div>
+                    <div class="code-line"><span class="line-number">134</span>            <span class="highlight">params.extend(layer.parameters())</span></div>
+                    <div class="code-line"><span class="line-number">135</span>    <span class="keyword">return</span> params</div>
+                </div>
+            </section>
+
+            <!-- Conv2D -->
+            <section id="conv2d" class="algorithm-section">
+                <h2>Conv2D Layer <span class="algorithm-type cnn">CNN</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">2D Convolution</span>
+                    <p>$$y[n, c_{out}, h, w] = \sum_{c_{in}=0}^{C_{in}-1} \sum_{i=0}^{k_h-1} \sum_{j=0}^{k_w-1} x[n, c_{in}, h \cdot s + i, w \cdot s + j] \cdot W[c_{out}, c_{in}, i, j] + b[c_{out}]$$</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Output Size</span>
+                    <p>$$H_{out} = \frac{H_{in} + 2 \cdot \text{padding} - \text{kernel\_size}}{\text{stride}} + 1$$</p>
+                    <p>Input shape: $(N, C_{in}, H, W)$ → Output shape: $(N, C_{out}, H_{out}, W_{out})$</p>
+                </div>
+
+                <div class="visual-diagram">
+                    <div class="network-diagram">
+                        <div class="layer-box">Input<br>(N, 3, 32, 32)</div>
+                        <div class="arrow">→</div>
+                        <div class="layer-box">Conv2D<br>3×3, stride=1</div>
+                        <div class="arrow">→</div>
+                        <div class="layer-box">Output<br>(N, 16, 32, 32)</div>
+                    </div>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">conv.py - im2col Transformation</div>
+                    <div class="code-line"><span class="line-number">20</span><span class="keyword">def</span> <span class="function">_im2col</span>(input_data, kernel_h, kernel_w, stride, padding):</div>
+                    <div class="code-line"><span class="line-number">21</span>    <span class="comment">"""Transform input patches to columns for efficient convolution."""</span></div>
+                    <div class="code-line"><span class="line-number">50</span>    <span class="keyword">for</span> y <span class="keyword">in</span> range(kernel_h):</div>
+                    <div class="code-line"><span class="line-number">51</span>        y_max = y + stride * out_h</div>
+                    <div class="code-line"><span class="line-number">52</span>        <span class="keyword">for</span> x <span class="keyword">in</span> range(kernel_w):</div>
+                    <div class="code-line"><span class="line-number">53</span>            x_max = x + stride * out_w</div>
+                    <div class="code-line"><span class="line-number">54</span>            <span class="highlight">col[:, :, y, x, :, :] = input_padded[:, :, y:y_max:stride, x:x_max:stride]</span></div>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">conv.py - Convolution as Matrix Multiplication</div>
+                    <div class="code-line"><span class="line-number">180</span><span class="comment"># im2col transformation</span></div>
+                    <div class="code-line"><span class="line-number">181</span>x_col = <span class="highlight">_im2col(x.data, kH, kW, self.stride, self.padding)</span></div>
+                    <div class="code-line"><span class="line-number">184</span><span class="comment"># Reshape weights: (out_channels, in_channels, kH, kW) -> (out_channels, in_channels * kH * kW)</span></div>
+                    <div class="code-line"><span class="line-number">185</span>w_col = self.weight.data.reshape(self.out_channels, -1)</div>
+                    <div class="code-line"><span class="line-number">188</span><span class="comment"># Convolution as matrix multiplication</span></div>
+                    <div class="code-line"><span class="line-number">189</span>out_data = <span class="highlight">x_col @ w_col.T</span>  <span class="comment"># (N * out_h * out_w, out_channels)</span></div>
+                </div>
+
+                <div class="theory-code-link">
+                    <strong>📝 Theory → Code:</strong> The im2col transformation converts convolution into efficient matrix multiplication. Each patch of the input becomes a row, and the kernel becomes columns.
+                </div>
+
+                <div class="key-points">
+                    <h4>Key Implementation Details:</h4>
+                    <ul>
+                        <li><strong>NCHW format</strong>: (batch, channels, height, width) - PyTorch style</li>
+                        <li><strong>im2col optimization</strong>: Converts sliding window to matrix ops</li>
+                        <li><strong>col2im for backward</strong>: Inverse transformation for gradients</li>
+                        <li><strong>Xavier initialization</strong>: Proper weight scaling for gradient flow</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Pooling -->
+            <section id="pooling" class="algorithm-section">
+                <h2>Pooling Layers <span class="algorithm-type cnn">CNN</span></h2>
+                
+                <h3>MaxPool2D</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Max Pooling</span>
+                    <p>$$y[n, c, h, w] = \max_{i,j \in \text{window}} x[n, c, h \cdot s + i, w \cdot s + j]$$</p>
+                    <p>Selects maximum value from each pooling window. Gradient flows only to the max element.</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">conv.py - MaxPool2D Forward</div>
+                    <div class="code-line"><span class="line-number">310</span><span class="keyword">for</span> i <span class="keyword">in</span> range(out_h):</div>
+                    <div class="code-line"><span class="line-number">311</span>    <span class="keyword">for</span> j <span class="keyword">in</span> range(out_w):</div>
+                    <div class="code-line"><span class="line-number">316</span>        window = x_padded[:, :, h_start:h_end, w_start:w_end]</div>
+                    <div class="code-line"><span class="line-number">319</span>        window_flat = window.reshape(N, C, -1)</div>
+                    <div class="code-line"><span class="line-number">320</span>        max_idx_flat = <span class="highlight">np.argmax(window_flat, axis=2)</span></div>
+                    <div class="code-line"><span class="line-number">325</span>        out_data[:, :, i, j] = <span class="highlight">np.max(window_flat, axis=2)</span></div>
+                </div>
+
+                <h3>AvgPool2D</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Average Pooling</span>
+                    <p>$$y[n, c, h, w] = \frac{1}{k_h \cdot k_w} \sum_{i,j \in \text{window}} x[n, c, h \cdot s + i, w \cdot s + j]$$</p>
+                    <p>Gradient is distributed equally to all elements in the window.</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">conv.py - AvgPool2D Forward</div>
+                    <div class="code-line"><span class="line-number">410</span>window = x_padded[:, :, h_start:h_end, w_start:w_end]</div>
+                    <div class="code-line"><span class="line-number">411</span>out_data[:, :, i, j] = <span class="highlight">np.mean(window, axis=(2, 3))</span></div>
+                </div>
+
+                <div class="theory-code-link">
+                    <strong>📝 Theory → Code:</strong> MaxPool stores indices of max elements for backward pass. AvgPool distributes gradient by $\frac{1}{k^2}$.
+                </div>
+            </section>
+
+            <!-- BatchNorm -->
+            <section id="batchnorm" class="algorithm-section">
+                <h2>Batch Normalization <span class="algorithm-type cnn">CNN</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Normalization</span>
+                    <p>$$\hat{x} = \frac{x - \mu_B}{\sqrt{\sigma_B^2 + \epsilon}}$$</p>
+                    <p>where $\mu_B$ and $\sigma_B^2$ are batch mean and variance per channel.</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Scale and Shift</span>
+                    <p>$$y = \gamma \hat{x} + \beta$$</p>
+                    <p>Learnable parameters $\gamma$ (scale) and $\beta$ (shift) restore representational power.</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Running Statistics</span>
+                    <p>$$\mu_{running} = (1 - m) \cdot \mu_{running} + m \cdot \mu_B$$</p>
+                    <p>During training, running stats are updated. During inference, running stats are used.</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">conv.py - BatchNorm2D Forward</div>
+                    <div class="code-line"><span class="line-number">510</span><span class="keyword">if</span> self.training:</div>
+                    <div class="code-line"><span class="line-number">512</span>    mean = <span class="highlight">np.mean(x.data, axis=(0, 2, 3), keepdims=True)</span></div>
+                    <div class="code-line"><span class="line-number">513</span>    var = <span class="highlight">np.var(x.data, axis=(0, 2, 3), keepdims=True)</span></div>
+                    <div class="code-line"><span class="line-number">516</span>    self.running_mean = (1 - self.momentum) * self.running_mean + self.momentum * mean.squeeze()</div>
+                    <div class="code-line"><span class="line-number">517</span>    self.running_var = (1 - self.momentum) * self.running_var + self.momentum * var.squeeze()</div>
+                    <div class="code-line"><span class="line-number">524</span>x_norm = <span class="highlight">(x.data - mean) / np.sqrt(var + self.eps)</span></div>
+                    <div class="code-line"><span class="line-number">528</span>out_data = <span class="highlight">gamma * x_norm + beta</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Key Features:</h4>
+                    <ul>
+                        <li><strong>train() / eval() modes</strong>: Switches between batch and running statistics</li>
+                        <li><strong>Per-channel normalization</strong>: Mean/var computed over (N, H, W) for each C</li>
+                        <li><strong>Reduces internal covariate shift</strong>: Stabilizes training</li>
+                        <li><strong>Acts as regularization</strong>: Noise from batch statistics</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Dropout -->
+            <section id="dropout" class="algorithm-section">
+                <h2>Dropout <span class="algorithm-type cnn">Regularization</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Training</span>
+                    <p>$$y_i = \frac{x_i \cdot m_i}{1 - p}, \quad m_i \sim \text{Bernoulli}(1-p)$$</p>
+                    <p>Each element is zeroed with probability $p$, and scaled by $\frac{1}{1-p}$ (inverted dropout).</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Inference</span>
+                    <p>$$y = x$$</p>
+                    <p>No dropout during evaluation - outputs unchanged.</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">conv.py - Dropout Implementation</div>
+                    <div class="code-line"><span class="line-number">620</span><span class="keyword">if not</span> self.training <span class="keyword">or</span> self.p == 0:</div>
+                    <div class="code-line"><span class="line-number">621</span>    <span class="keyword">return</span> x</div>
+                    <div class="code-line"><span class="line-number">624</span>mask = <span class="highlight">(np.random.rand(*x.shape) > self.p).astype(np.float32)</span></div>
+                    <div class="code-line"><span class="line-number">627</span>scale = <span class="highlight">1.0 / (1.0 - self.p)</span></div>
+                    <div class="code-line"><span class="line-number">628</span>out_data = x.data * mask * scale</div>
+                </div>
+
+                <div class="theory-code-link">
+                    <strong>📝 Theory → Code:</strong> Inverted dropout scales during training (line 627) so no change is needed at test time.
+                </div>
+            </section>
+
+            <!-- RNN / LSTM / GRU -->
+            <section id="rnn" class="algorithm-section">
+                <h2>RNN / LSTM / GRU <span class="algorithm-type rnn">RNN</span></h2>
+                
+                <h3>Basic RNN</h3>
+                <div class="math-formula">
+                    <span class="formula-label">RNN Update</span>
+                    <p>$$h_t = \tanh(W_{ih} x_t + W_{hh} h_{t-1} + b)$$</p>
+                    <p>Simple but suffers from vanishing gradients on long sequences.</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">rnn.py - RNNCell</div>
+                    <div class="code-line"><span class="line-number">75</span><span class="comment"># Compute: h_new = tanh(x @ W_ih + h @ W_hh + bias)</span></div>
+                    <div class="code-line"><span class="line-number">76</span>out = <span class="highlight">x @ self.W_ih + h @ self.W_hh</span></div>
+                    <div class="code-line"><span class="line-number">79</span><span class="keyword">if</span> self.use_bias:</div>
+                    <div class="code-line"><span class="line-number">80</span>    out = out + self.bias</div>
+                    <div class="code-line"><span class="line-number">82</span>h_new = <span class="highlight">tanh(out)</span></div>
+                </div>
+
+                <h3>LSTM (Long Short-Term Memory)</h3>
+                <div class="math-formula">
+                    <span class="formula-label">LSTM Gates</span>
+                    <p><strong>Input gate:</strong> $i_t = \sigma(W_{ii} x_t + W_{hi} h_{t-1} + b_i)$</p>
+                    <p><strong>Forget gate:</strong> $f_t = \sigma(W_{if} x_t + W_{hf} h_{t-1} + b_f)$</p>
+                    <p><strong>Cell gate:</strong> $g_t = \tanh(W_{ig} x_t + W_{hg} h_{t-1} + b_g)$</p>
+                    <p><strong>Output gate:</strong> $o_t = \sigma(W_{io} x_t + W_{ho} h_{t-1} + b_o)$</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">State Updates</span>
+                    <p><strong>Cell state:</strong> $c_t = f_t \odot c_{t-1} + i_t \odot g_t$</p>
+                    <p><strong>Hidden state:</strong> $h_t = o_t \odot \tanh(c_t)$</p>
+                    <p>The cell state $c_t$ provides a "highway" for gradients to flow through time.</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">rnn.py - LSTMCell</div>
+                    <div class="code-line"><span class="line-number">270</span><span class="comment"># Apply activations</span></div>
+                    <div class="code-line"><span class="line-number">271</span>i = <span class="highlight">1.0 / (1.0 + np.exp(-np.clip(i_gate, -500, 500)))</span>  <span class="comment"># sigmoid</span></div>
+                    <div class="code-line"><span class="line-number">272</span>f = 1.0 / (1.0 + np.exp(-np.clip(f_gate, -500, 500)))  <span class="comment"># sigmoid</span></div>
+                    <div class="code-line"><span class="line-number">273</span>g = np.tanh(g_gate)</div>
+                    <div class="code-line"><span class="line-number">274</span>o = 1.0 / (1.0 + np.exp(-np.clip(o_gate, -500, 500)))  <span class="comment"># sigmoid</span></div>
+                    <div class="code-line"><span class="line-number">277</span>c_new_data = <span class="highlight">f * c.data + i * g</span>  <span class="comment"># Cell state update</span></div>
+                    <div class="code-line"><span class="line-number">280</span>h_new_data = <span class="highlight">o * np.tanh(c_new_data)</span>  <span class="comment"># Hidden state</span></div>
+                </div>
+
+                <h3>GRU (Gated Recurrent Unit)</h3>
+                <div class="math-formula">
+                    <span class="formula-label">GRU Gates</span>
+                    <p><strong>Reset gate:</strong> $r_t = \sigma(W_{ir} x_t + W_{hr} h_{t-1} + b_r)$</p>
+                    <p><strong>Update gate:</strong> $z_t = \sigma(W_{iz} x_t + W_{hz} h_{t-1} + b_z)$</p>
+                    <p><strong>New gate:</strong> $n_t = \tanh(W_{in} x_t + r_t \odot (W_{hn} h_{t-1}) + b_n)$</p>
+                    <p><strong>Hidden state:</strong> $h_t = (1 - z_t) \odot n_t + z_t \odot h_{t-1}$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">rnn.py - GRUCell</div>
+                    <div class="code-line"><span class="line-number">520</span><span class="comment"># Apply activations</span></div>
+                    <div class="code-line"><span class="line-number">521</span>r = <span class="highlight">1.0 / (1.0 + np.exp(-np.clip(x_r + h_r, -500, 500)))</span>  <span class="comment"># Reset gate</span></div>
+                    <div class="code-line"><span class="line-number">522</span>z = 1.0 / (1.0 + np.exp(-np.clip(x_z + h_z, -500, 500)))  <span class="comment"># Update gate</span></div>
+                    <div class="code-line"><span class="line-number">523</span>n = np.tanh(x_n + r * h_n)  <span class="comment"># New gate</span></div>
+                    <div class="code-line"><span class="line-number">526</span>h_new_data = <span class="highlight">(1 - z) * n + z * h.data</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Comparison:</h4>
+                    <ul>
+                        <li><strong>RNN</strong>: Simple, but vanishing gradients limit sequence length</li>
+                        <li><strong>LSTM</strong>: Cell state highway solves vanishing gradients, 4 gates</li>
+                        <li><strong>GRU</strong>: Simpler than LSTM with 3 gates, often similar performance</li>
+                        <li><strong>Forget gate bias = 1</strong>: Initialized to remember by default</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Scaled Dot-Product Attention -->
+            <section id="attention" class="algorithm-section">
+                <h2>Scaled Dot-Product Attention <span class="algorithm-type attention">Attention</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Attention Formula</span>
+                    <p>$$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right) V$$</p>
+                    <p>where $Q$ (query), $K$ (key), $V$ (value) have shape $(batch, seq, d_k)$.</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Why Scale by $\sqrt{d_k}$?</span>
+                    <p>For large $d_k$, dot products grow large, pushing softmax into regions with tiny gradients.</p>
+                    <p>Scaling by $\sqrt{d_k}$ keeps variance stable: $\text{Var}(q \cdot k) = d_k \Rightarrow \text{Var}\left(\frac{q \cdot k}{\sqrt{d_k}}\right) = 1$</p>
+                </div>
+
+                <div class="visual-diagram">
+                    <div class="network-diagram">
+                        <div class="layer-box">Q<br>(n, seq, d)</div>
+                        <div class="layer-box">K<br>(n, seq, d)</div>
+                        <div class="layer-box">V<br>(n, seq, d)</div>
+                        <div class="arrow">→</div>
+                        <div class="layer-box">Q @ K.T<br>/ √d</div>
+                        <div class="arrow">→</div>
+                        <div class="layer-box">softmax</div>
+                        <div class="arrow">→</div>
+                        <div class="layer-box">@ V</div>
+                        <div class="arrow">→</div>
+                        <div class="layer-box">Output<br>(n, seq, d)</div>
+                    </div>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">attention.py - Scaled Dot-Product Attention</div>
+                    <div class="code-line"><span class="line-number">45</span><span class="comment"># Compute attention scores: Q @ K^T</span></div>
+                    <div class="code-line"><span class="line-number">50</span>key_T_data = key.data.transpose(0, 2, 1)</div>
+                    <div class="code-line"><span class="line-number">53</span>scores_data = <span class="highlight">query.data @ key_T_data</span></div>
+                    <div class="code-line"><span class="line-number">56</span>scale = <span class="highlight">np.sqrt(d_k)</span></div>
+                    <div class="code-line"><span class="line-number">57</span>scores_data = scores_data / scale</div>
+                    <div class="code-line"><span class="line-number">60</span><span class="keyword">if</span> mask <span class="keyword">is not</span> None:</div>
+                    <div class="code-line"><span class="line-number">61</span>    scores_data = scores_data + mask.data  <span class="comment"># Add -inf for masked positions</span></div>
+                    <div class="code-line"><span class="line-number">65</span>attention_weights_data = <span class="highlight">softmax(scores_data)</span></div>
+                    <div class="code-line"><span class="line-number">73</span>output_data = <span class="highlight">attention_weights_data @ value.data</span></div>
+                </div>
+
+                <div class="theory-code-link">
+                    <strong>📝 Theory → Code:</strong> Masking adds large negative values before softmax, pushing those positions to ~0 attention weight.
+                </div>
+            </section>
+
+            <!-- Multi-Head Attention -->
+            <section id="multihead-attention" class="algorithm-section">
+                <h2>Multi-Head Attention <span class="algorithm-type attention">Attention</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Multi-Head Attention</span>
+                    <p>$$\text{MultiHead}(Q, K, V) = \text{Concat}(\text{head}_1, ..., \text{head}_h) W^O$$</p>
+                    <p>$$\text{head}_i = \text{Attention}(Q W_i^Q, K W_i^K, V W_i^V)$$</p>
+                    <p>where $W_i^Q, W_i^K, W_i^V \in \mathbb{R}^{d_{model} \times d_k}$ and $d_k = d_{model} / h$</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Why Multiple Heads?</span>
+                    <p>Different heads can learn different types of relationships:</p>
+                    <ul>
+                        <li>Syntactic relationships (subject-verb)</li>
+                        <li>Positional relationships (nearby tokens)</li>
+                        <li>Semantic relationships (synonyms)</li>
+                    </ul>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">attention.py - MultiHeadAttention</div>
+                    <div class="code-line"><span class="line-number">220</span><span class="comment"># Linear projections</span></div>
+                    <div class="code-line"><span class="line-number">221</span>Q = <span class="highlight">query.data @ self.W_q.data</span></div>
+                    <div class="code-line"><span class="line-number">222</span>K = key.data @ self.W_k.data</div>
+                    <div class="code-line"><span class="line-number">223</span>V = value.data @ self.W_v.data</div>
+                    <div class="code-line"><span class="line-number">230</span><span class="comment"># Reshape for multi-head: (batch, seq, d_model) -> (batch, num_heads, seq, d_k)</span></div>
+                    <div class="code-line"><span class="line-number">231</span>Q = <span class="highlight">Q.reshape(batch_size, seq_len_q, self.num_heads, self.d_k).transpose(0, 2, 1, 3)</span></div>
+                    <div class="code-line"><span class="line-number">240</span><span class="comment"># Compute attention scores</span></div>
+                    <div class="code-line"><span class="line-number">241</span>scores = <span class="highlight">Q @ K.transpose(0, 1, 3, 2) / np.sqrt(self.d_k)</span></div>
+                    <div class="code-line"><span class="line-number">260</span><span class="comment"># Reshape back: (batch, heads, seq_q, d_k) -> (batch, seq_q, d_model)</span></div>
+                    <div class="code-line"><span class="line-number">261</span>context = context.transpose(0, 2, 1, 3).reshape(batch_size, seq_len_q, self.d_model)</div>
+                    <div class="code-line"><span class="line-number">264</span>output_data = <span class="highlight">context @ self.W_o.data</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Details:</h4>
+                    <ul>
+                        <li><strong>Shape transformations</strong>: (batch, seq, d_model) → (batch, heads, seq, d_k)</li>
+                        <li><strong>Parallel computation</strong>: All heads computed simultaneously via batched matmul</li>
+                        <li><strong>Output projection</strong>: Concatenated heads projected back to d_model</li>
+                        <li><strong>Masking support</strong>: Causal masks for autoregressive models</li>
+                    </ul>
+                </div>
+
+                <div class="theory-code-link">
+                    <strong>📝 Theory → Code:</strong> The reshape/transpose operations split $d_{model}$ into $h$ heads of size $d_k$. Attention is computed per-head, then concatenated.
+                </div>
+            </section>
+
+            <!-- ReLU -->
+            <section id="relu" class="algorithm-section">
+                <h2>ReLU Activation <span class="algorithm-type activation">Activation</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">ReLU Function</span>
+                    <p>$$\text{ReLU}(x) = \max(0, x) = \begin{cases} x & \text{if } x > 0 \\ 0 & \text{otherwise} \end{cases}$$</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Gradient</span>
+                    <p>$$\frac{\partial \text{ReLU}(x)}{\partial x} = \begin{cases} 1 & \text{if } x > 0 \\ 0 & \text{otherwise} \end{cases}$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">activations.py - ReLU Implementation</div>
+                    <div class="code-line"><span class="line-number">11</span><span class="keyword">def</span> <span class="function">relu</span>(x: Tensor) -> Tensor:</div>
+                    <div class="code-line"><span class="line-number">22</span>    out = Tensor(</div>
+                    <div class="code-line"><span class="line-number">23</span>        <span class="highlight">np.maximum(0, x.data)</span>,  <span class="comment"># max(0, x)</span></div>
+                    <div class="code-line"><span class="line-number">24</span>        requires_grad=x.requires_grad,</div>
+                    <div class="code-line"><span class="line-number">25</span>    )</div>
+                    <div class="code-line"><span class="line-number">30</span>    <span class="keyword">def</span> <span class="function">_backward</span>(grad):</div>
+                    <div class="code-line"><span class="line-number">31</span>        <span class="comment"># Gradient is 1 where x > 0, else 0</span></div>
+                    <div class="code-line"><span class="line-number">32</span>        grad_self = <span class="highlight">grad * (x.data > 0).astype(np.float32)</span></div>
+                    <div class="code-line"><span class="line-number">33</span>        <span class="keyword">return</span> (grad_self,)</div>
+                </div>
+
+                <div class="theory-code-link">
+                    <strong>📝 Theory → Code:</strong> The forward pass uses <code>np.maximum(0, x.data)</code> (line 23). The backward pass multiplies the incoming gradient by 1 where input > 0, else 0 (line 32).
+                </div>
+            </section>
+
+            <!-- Sigmoid -->
+            <section id="sigmoid" class="algorithm-section">
+                <h2>Sigmoid Activation <span class="algorithm-type activation">Activation</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Sigmoid Function</span>
+                    <p>$$\sigma(x) = \frac{1}{1 + e^{-x}}$$</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Gradient</span>
+                    <p>$$\frac{\partial \sigma(x)}{\partial x} = \sigma(x)(1 - \sigma(x))$$</p>
+                    <p>Note: The gradient can be computed efficiently using only the output value.</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">activations.py - Sigmoid Implementation</div>
+                    <div class="code-line"><span class="line-number">85</span><span class="keyword">def</span> <span class="function">sigmoid</span>(x: Tensor) -> Tensor:</div>
+                    <div class="code-line"><span class="line-number">97</span>    <span class="comment"># Clip to avoid overflow</span></div>
+                    <div class="code-line"><span class="line-number">98</span>    x_clipped = <span class="highlight">np.clip(x.data, -500, 500)</span></div>
+                    <div class="code-line"><span class="line-number">99</span>    sigmoid_data = <span class="highlight">1.0 / (1.0 + np.exp(-x_clipped))</span></div>
+                    <div class="code-line"><span class="line-number">108</span>    <span class="keyword">def</span> <span class="function">_backward</span>(grad):</div>
+                    <div class="code-line"><span class="line-number">109</span>        <span class="comment"># d/dx sigmoid(x) = sigmoid(x) * (1 - sigmoid(x))</span></div>
+                    <div class="code-line"><span class="line-number">110</span>        sigmoid_grad = <span class="highlight">out.data * (1 - out.data)</span></div>
+                    <div class="code-line"><span class="line-number">111</span>        grad_self = grad * sigmoid_grad</div>
+                </div>
+
+                <div class="theory-code-link">
+                    <strong>📝 Theory → Code:</strong> Input is clipped (line 98) to prevent overflow. The gradient uses the elegant formula $\sigma(1-\sigma)$ (line 110).
+                </div>
+            </section>
+
+            <!-- Softmax -->
+            <section id="softmax" class="algorithm-section">
+                <h2>Softmax Activation <span class="algorithm-type activation">Activation</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Softmax Function</span>
+                    <p>$$\text{softmax}(x_i) = \frac{e^{x_i}}{\sum_{j=1}^{K} e^{x_j}}$$</p>
+                    <p>Converts logits to a probability distribution (sums to 1).</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Jacobian</span>
+                    <p>$$\frac{\partial \text{softmax}(x_i)}{\partial x_j} = \text{softmax}(x_i)(\delta_{ij} - \text{softmax}(x_j))$$</p>
+                    <p>where $\delta_{ij}$ is the Kronecker delta.</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">activations.py - Softmax Implementation</div>
+                    <div class="code-line"><span class="line-number">149</span><span class="keyword">def</span> <span class="function">softmax</span>(x: Tensor, axis: int = -1) -> Tensor:</div>
+                    <div class="code-line"><span class="line-number">162</span>    <span class="comment"># Subtract max for numerical stability</span></div>
+                    <div class="code-line"><span class="line-number">163</span>    x_shifted = <span class="highlight">x.data - np.max(x.data, axis=axis, keepdims=True)</span></div>
+                    <div class="code-line"><span class="line-number">164</span>    exp_x = np.exp(x_shifted)</div>
+                    <div class="code-line"><span class="line-number">165</span>    softmax_data = <span class="highlight">exp_x / np.sum(exp_x, axis=axis, keepdims=True)</span></div>
+                    <div class="code-line"><span class="line-number">191</span>    <span class="comment"># grad_i = softmax_i * (grad_i - Σ_j grad_j * softmax_j)</span></div>
+                    <div class="code-line"><span class="line-number">194</span>    grad_self = <span class="highlight">out.data * (grad - grad_softmax_sum)</span></div>
+                </div>
+
+                <div class="theory-code-link">
+                    <strong>📝 Theory → Code:</strong> The "max subtraction trick" (line 163) prevents overflow. The gradient formula simplifies to $s_i \cdot (g_i - \sum_j g_j s_j)$ (line 194).
+                </div>
+            </section>
+
+            <!-- MSE Loss -->
+            <section id="mse-loss" class="algorithm-section">
+                <h2>Mean Squared Error Loss <span class="algorithm-type loss">Loss</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">MSE Formula</span>
+                    <p>$$\text{MSE} = \frac{1}{n}\sum_{i=1}^{n}(\hat{y}_i - y_i)^2$$</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Gradient</span>
+                    <p>$$\frac{\partial \text{MSE}}{\partial \hat{y}_i} = \frac{2}{n}(\hat{y}_i - y_i)$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">losses.py - MSE Implementation</div>
+                    <div class="code-line"><span class="line-number">12</span><span class="keyword">def</span> <span class="function">mse_loss</span>(pred: Tensor, target: Tensor) -> Tensor:</div>
+                    <div class="code-line"><span class="line-number">25</span>    <span class="comment"># Element-wise squared difference</span></div>
+                    <div class="code-line"><span class="line-number">26</span>    diff = <span class="highlight">pred - target</span></div>
+                    <div class="code-line"><span class="line-number">27</span>    squared_diff = <span class="highlight">diff * diff</span></div>
+                    <div class="code-line"><span class="line-number">30</span>    loss = <span class="highlight">squared_diff.mean()</span></div>
+                </div>
+
+                <div class="theory-code-link">
+                    <strong>📝 Theory → Code:</strong> Computes $(pred - target)^2$ and takes mean. Gradients are automatic through autograd.
+                </div>
+            </section>
+
+            <!-- Cross-Entropy -->
+            <section id="cross-entropy" class="algorithm-section">
+                <h2>Cross-Entropy Loss <span class="algorithm-type loss">Loss</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Cross-Entropy Formula</span>
+                    <p>$$\text{CE} = -\sum_{i=1}^{K} y_i \log(\hat{y}_i)$$</p>
+                    <p>For one-hot encoded targets, simplifies to: $\text{CE} = -\log(\hat{y}_c)$ where $c$ is the true class.</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Softmax + Cross-Entropy Gradient</span>
+                    <p>$$\frac{\partial L}{\partial z_i} = \hat{y}_i - y_i$$</p>
+                    <p>This elegant result makes backpropagation very efficient.</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">losses.py - Cross-Entropy Implementation</div>
+                    <div class="code-line"><span class="line-number">34</span><span class="keyword">def</span> <span class="function">cross_entropy_loss</span>(pred: Tensor, target: Tensor) -> Tensor:</div>
+                    <div class="code-line"><span class="line-number">52</span>    <span class="comment"># Apply softmax to get probabilities</span></div>
+                    <div class="code-line"><span class="line-number">53</span>    probs = <span class="highlight">softmax(pred, axis=-1)</span></div>
+                    <div class="code-line"><span class="line-number">64</span>    <span class="comment"># Create one-hot encoding</span></div>
+                    <div class="code-line"><span class="line-number">65</span>    target_one_hot = np.zeros((batch_size, num_classes), dtype=np.float32)</div>
+                    <div class="code-line"><span class="line-number">66</span>    <span class="highlight">target_one_hot[np.arange(batch_size), target_indices] = 1.0</span></div>
+                    <div class="code-line"><span class="line-number">74</span>    log_probs = <span class="highlight">probs.log()</span></div>
+                    <div class="code-line"><span class="line-number">77</span>    neg_log_likelihood = <span class="highlight">-(target_one_hot * log_probs)</span></div>
+                    <div class="code-line"><span class="line-number">80</span>    loss = neg_log_likelihood.sum() / pred.shape[0]</div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Steps:</h4>
+                    <ol>
+                        <li><strong>Apply softmax</strong> (line 53): Convert logits to probabilities</li>
+                        <li><strong>One-hot encode</strong> (lines 64-66): Handle class index inputs</li>
+                        <li><strong>Compute log probabilities</strong> (line 74): Take log of softmax outputs</li>
+                        <li><strong>Negative log likelihood</strong> (line 77): $-y \log(\hat{y})$</li>
+                        <li><strong>Average over batch</strong> (line 80): Mean loss</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- SGD -->
+            <section id="sgd" class="algorithm-section">
+                <h2>SGD Optimizer <span class="algorithm-type optimizer">Optimizer</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Vanilla SGD</span>
+                    <p>$$\theta_{t+1} = \theta_t - \alpha \nabla_\theta L$$</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">SGD with Momentum</span>
+                    <p>$$v_{t+1} = \mu v_t - \alpha \nabla_\theta L$$</p>
+                    <p>$$\theta_{t+1} = \theta_t + v_{t+1}$$</p>
+                    <p>where $\mu$ is the momentum coefficient (typically 0.9).</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Weight Decay (L2 Regularization)</span>
+                    <p>$$\nabla_\theta L_{reg} = \nabla_\theta L + \lambda \theta$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">optim.py - SGD Implementation</div>
+                    <div class="code-line"><span class="line-number">70</span><span class="keyword">def</span> <span class="function">step</span>(self):</div>
+                    <div class="code-line"><span class="line-number">80</span>    <span class="comment"># Apply weight decay</span></div>
+                    <div class="code-line"><span class="line-number">81</span>    <span class="keyword">if</span> self.weight_decay > 0:</div>
+                    <div class="code-line"><span class="line-number">82</span>        grad = <span class="highlight">grad + self.weight_decay * param_data</span></div>
+                    <div class="code-line"><span class="line-number">84</span>    <span class="comment"># Apply momentum if enabled</span></div>
+                    <div class="code-line"><span class="line-number">85</span>    <span class="keyword">if</span> self.momentum > 0:</div>
+                    <div class="code-line"><span class="line-number">89</span>        self.velocity[i] = <span class="highlight">self.momentum * self.velocity[i] - self.lr * grad</span></div>
+                    <div class="code-line"><span class="line-number">90</span>        update = self.velocity[i]</div>
+                    <div class="code-line"><span class="line-number">91</span>    <span class="keyword">else</span>:</div>
+                    <div class="code-line"><span class="line-number">92</span>        update = <span class="highlight">-self.lr * grad</span></div>
+                    <div class="code-line"><span class="line-number">95</span>    param.data = <span class="highlight">param_data + update</span></div>
+                </div>
+
+                <div class="theory-code-link">
+                    <strong>📝 Theory → Code:</strong> Weight decay adds $\lambda\theta$ to gradient (line 82). Momentum accumulates velocity (line 89). Update applies velocity or direct gradient (line 95).
+                </div>
+            </section>
+
+            <!-- Adam -->
+            <section id="adam" class="algorithm-section">
+                <h2>Adam Optimizer <span class="algorithm-type optimizer">Optimizer</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">First Moment (Mean)</span>
+                    <p>$$m_t = \beta_1 m_{t-1} + (1 - \beta_1) g_t$$</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Second Moment (Variance)</span>
+                    <p>$$v_t = \beta_2 v_{t-1} + (1 - \beta_2) g_t^2$$</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Bias Correction</span>
+                    <p>$$\hat{m}_t = \frac{m_t}{1 - \beta_1^t}, \quad \hat{v}_t = \frac{v_t}{1 - \beta_2^t}$$</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Update Rule</span>
+                    <p>$$\theta_{t+1} = \theta_t - \alpha \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$$</p>
+                    <p>Typical values: $\beta_1 = 0.9$, $\beta_2 = 0.999$, $\epsilon = 10^{-8}$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">optim.py - Adam Implementation</div>
+                    <div class="code-line"><span class="line-number">134</span><span class="keyword">def</span> <span class="function">step</span>(self):</div>
+                    <div class="code-line"><span class="line-number">136</span>    self.t += 1</div>
+                    <div class="code-line"><span class="line-number">165</span>    <span class="comment"># Update biased first moment estimate</span></div>
+                    <div class="code-line"><span class="line-number">166</span>    self.m[i] = <span class="highlight">self.beta1 * self.m[i] + (1 - self.beta1) * grad</span></div>
+                    <div class="code-line"><span class="line-number">168</span>    <span class="comment"># Update biased second raw moment estimate</span></div>
+                    <div class="code-line"><span class="line-number">169</span>    self.v[i] = <span class="highlight">self.beta2 * self.v[i] + (1 - self.beta2) * (grad ** 2)</span></div>
+                    <div class="code-line"><span class="line-number">171</span>    <span class="comment"># Bias correction</span></div>
+                    <div class="code-line"><span class="line-number">172</span>    m_hat = <span class="highlight">self.m[i] / (1 - self.beta1 ** self.t)</span></div>
+                    <div class="code-line"><span class="line-number">173</span>    v_hat = <span class="highlight">self.v[i] / (1 - self.beta2 ** self.t)</span></div>
+                    <div class="code-line"><span class="line-number">176</span>    param.data = param_data - <span class="highlight">self.lr * m_hat / (np.sqrt(v_hat) + self.eps)</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Implementation Steps:</h4>
+                    <ol>
+                        <li><strong>Increment timestep</strong> (line 136): Track iteration count for bias correction</li>
+                        <li><strong>Update first moment</strong> (line 166): Exponential moving average of gradients</li>
+                        <li><strong>Update second moment</strong> (line 169): Exponential moving average of squared gradients</li>
+                        <li><strong>Bias correction</strong> (lines 172-173): Correct for initialization bias</li>
+                        <li><strong>Parameter update</strong> (line 176): Adaptive learning rate update</li>
+                    </ol>
+                </div>
+
+                <div class="theory-code-link">
+                    <strong>📝 Theory → Code:</strong> Adam combines momentum (first moment) with RMSprop-style adaptive learning rates (second moment). Bias correction is critical for early training steps.
+                </div>
+            </section>
+
+            <!-- RMSprop -->
+            <section id="rmsprop" class="algorithm-section">
+                <h2>RMSprop Optimizer <span class="algorithm-type optimizer">Optimizer</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Running Average of Squared Gradients</span>
+                    <p>$$E[g^2]_t = \alpha E[g^2]_{t-1} + (1 - \alpha) g_t^2$$</p>
+                    <p>where $\alpha$ is the decay rate (typically 0.99).</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Update Rule</span>
+                    <p>$$\theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{E[g^2]_t} + \epsilon} g_t$$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">optim.py - RMSprop Implementation</div>
+                    <div class="code-line"><span class="line-number">211</span><span class="keyword">def</span> <span class="function">step</span>(self):</div>
+                    <div class="code-line"><span class="line-number">235</span>    <span class="comment"># Update squared gradient moving average</span></div>
+                    <div class="code-line"><span class="line-number">236</span>    self.sq_grad_avg[i] = <span class="highlight">self.alpha * self.sq_grad_avg[i] + (1 - self.alpha) * (grad ** 2)</span></div>
+                    <div class="code-line"><span class="line-number">239</span>    param.data = param_data - <span class="highlight">self.lr * grad / (np.sqrt(self.sq_grad_avg[i]) + self.eps)</span></div>
+                </div>
+
+                <div class="theory-code-link">
+                    <strong>📝 Theory → Code:</strong> RMSprop adapts learning rates per-parameter based on the magnitude of recent gradients. Large gradients get smaller effective learning rates.
+                </div>
+
+                <div class="key-points">
+                    <h4>Optimizer Comparison:</h4>
+                    <ul>
+                        <li><strong>SGD</strong>: Simple, but may oscillate. Momentum helps smooth updates.</li>
+                        <li><strong>RMSprop</strong>: Adapts learning rate per-parameter. Good for RNNs.</li>
+                        <li><strong>Adam</strong>: Combines momentum + RMSprop. Most popular default choice.</li>
+                    </ul>
+                </div>
+            </section>
+
+        </div>
+    </div>
+</body>
+</html>
