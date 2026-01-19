@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLMs & Transformers: Theory & Implementation</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            padding: 30px 40px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .toc h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .toc ul {
+            list-style: none;
+            columns: 2;
+            column-gap: 30px;
+        }
+
+        .toc li {
+            margin: 10px 0;
+            break-inside: avoid;
+        }
+
+        .toc a {
+            color: #495057;
+            text-decoration: none;
+            font-size: 1.1em;
+            transition: color 0.3s;
+            display: block;
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        .toc a:hover {
+            color: #667eea;
+            background: #e9ecef;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .algorithm-section {
+            margin-bottom: 60px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+
+        .algorithm-section h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .algorithm-section h3 {
+            color: #495057;
+            font-size: 1.5em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        .algorithm-section h4 {
+            color: #667eea;
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .math-formula {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #dee2e6;
+            overflow-x: auto;
+        }
+
+        .math-formula .formula-label {
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .visual-diagram {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #dee2e6;
+            text-align: center;
+        }
+
+        .code-snippet {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .code-snippet .code-header {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 10px 15px;
+            margin: -20px -20px 15px -20px;
+            border-radius: 8px 8px 0 0;
+            font-size: 0.85em;
+            border-bottom: 1px solid #3e3e3e;
+        }
+
+        .code-snippet .line-number {
+            color: #858585;
+            margin-right: 15px;
+            user-select: none;
+        }
+
+        .code-snippet .code-line {
+            display: block;
+            padding: 2px 0;
+        }
+
+        .code-snippet .highlight {
+            background: rgba(255, 255, 0, 0.2);
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        .code-snippet .comment {
+            color: #6a9955;
+        }
+
+        .code-snippet .keyword {
+            color: #569cd6;
+        }
+
+        .code-snippet .string {
+            color: #ce9178;
+        }
+
+        .code-snippet .function {
+            color: #dcdcaa;
+        }
+
+        .theory-code-link {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+
+        .theory-code-link strong {
+            color: #856404;
+        }
+
+        .key-points {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2196F3;
+        }
+
+        .key-points ul {
+            margin-left: 20px;
+        }
+
+        .key-points li {
+            margin: 10px 0;
+        }
+
+        .algorithm-type {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .tokenizer { background: #e74c3c; }
+        .transformer { background: #3498db; }
+        .gpt { background: #9b59b6; }
+        .sampling { background: #27ae60; }
+
+        .step-box {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .step-box .step-number {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .network-diagram {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            flex-wrap: wrap;
+        }
+
+        .layer-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .arrow {
+            font-size: 24px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Large Language Models from Scratch</h1>
+            <p>Transformers, GPT & Text Generation - Theory & Implementation</p>
+        </header>
+
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#bpe">Byte Pair Encoding (BPE)</a></li>
+                <li><a href="#wordpiece">WordPiece Tokenization</a></li>
+                <li><a href="#positional-encoding">Positional Encoding</a></li>
+                <li><a href="#layer-norm">Layer Normalization</a></li>
+                <li><a href="#causal-attention">Causal Self-Attention</a></li>
+                <li><a href="#transformer-block">Transformer Block</a></li>
+                <li><a href="#gpt-model">GPT Model Architecture</a></li>
+                <li><a href="#language-modeling">Language Modeling Loss</a></li>
+                <li><a href="#temperature">Temperature Sampling</a></li>
+                <li><a href="#top-k">Top-K Sampling</a></li>
+                <li><a href="#nucleus">Nucleus (Top-P) Sampling</a></li>
+                <li><a href="#beam-search">Beam Search</a></li>
+            </ul>
+        </div>
+
+        <div class="content">
+            <!-- BPE Tokenization -->
+            <section id="bpe" class="algorithm-section">
+                <h2>Byte Pair Encoding (BPE) <span class="algorithm-type tokenizer">Tokenizer</span></h2>
+                
+                <h3>Algorithm Overview</h3>
+                <p>BPE is a subword tokenization algorithm that iteratively merges the most frequent pairs of characters or tokens. Used in GPT-2, RoBERTa, and many modern LLMs.</p>
+                
+                <div class="math-formula">
+                    <span class="formula-label">BPE Algorithm</span>
+                    <ol>
+                        <li>Initialize vocabulary with all characters in corpus</li>
+                        <li>Count frequency of all adjacent token pairs</li>
+                        <li>Merge the most frequent pair into a new token</li>
+                        <li>Repeat until desired vocabulary size reached</li>
+                    </ol>
+                </div>
+
+                <div class="visual-diagram">
+                    <div class="network-diagram">
+                        <div class="layer-box">"low"</div>
+                        <div class="arrow">-></div>
+                        <div class="layer-box">['l','o','w']</div>
+                        <div class="arrow">-></div>
+                        <div class="layer-box">['lo','w']</div>
+                        <div class="arrow">-></div>
+                        <div class="layer-box">['low']</div>
+                    </div>
+                    <p><em>Progressive merging of character pairs</em></p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">tokenizer.py - BPE Merge Loop</div>
+                    <div class="code-line"><span class="line-number">195</span><span class="keyword">while</span> len(self.vocab) < self.target_vocab_size:</div>
+                    <div class="code-line"><span class="line-number">197</span>    pairs = self._get_corpus_pairs(word_freqs)</div>
+                    <div class="code-line"><span class="line-number">201</span>    <span class="highlight">best_pair = max(pairs.keys(), key=lambda p: pairs[p])</span></div>
+                    <div class="code-line"><span class="line-number">204</span>    <span class="keyword">for</span> word, freq <span class="keyword">in</span> word_freqs.items():</div>
+                    <div class="code-line"><span class="line-number">205</span>        new_word = <span class="highlight">self._merge_pair(word, best_pair)</span></div>
+                    <div class="code-line"><span class="line-number">210</span>    merged_token = best_pair[0] + best_pair[1]</div>
+                    <div class="code-line"><span class="line-number">215</span>    self.merges.append(best_pair)  <span class="comment"># Record merge order</span></div>
+                </div>
+
+                <div class="theory-code-link">
+                    <strong>Theory -> Code:</strong> The algorithm finds the most frequent adjacent pair (line 201) and merges them throughout the corpus (line 205). Merge order is preserved for encoding new text.
+                </div>
+            </section>
+
+            <!-- WordPiece -->
+            <section id="wordpiece" class="algorithm-section">
+                <h2>WordPiece Tokenization <span class="algorithm-type tokenizer">Tokenizer</span></h2>
+                
+                <h3>Key Difference from BPE</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Likelihood-Based Scoring</span>
+                    <p>$$\text{score}(a, b) = \frac{\text{freq}(ab)}{\text{freq}(a) \times \text{freq}(b)}$$</p>
+                    <p>Merges pairs that maximize likelihood increase, not just frequency.</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Subword Prefix</span>
+                    <p>Uses <code>##</code> prefix for continuation tokens:</p>
+                    <p>"playing" -> ["play", "##ing"]</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">tokenizer.py - WordPiece Score Computation</div>
+                    <div class="code-line"><span class="line-number">340</span><span class="keyword">for</span> pair, freq <span class="keyword">in</span> pair_freqs.items():</div>
+                    <div class="code-line"><span class="line-number">341</span>    <span class="highlight">score = freq / (token_freqs[pair[0]] * token_freqs[pair[1]])</span></div>
+                    <div class="code-line"><span class="line-number">342</span>    scores[pair] = score</div>
+                    <div class="code-line"><span class="line-number">345</span>best_pair = max(scores.keys(), key=<span class="keyword">lambda</span> p: scores[p])</div>
+                </div>
+
+                <div class="key-points">
+                    <h4>BPE vs WordPiece:</h4>
+                    <ul>
+                        <li><strong>BPE</strong>: Merges most frequent pairs (used in GPT-2, RoBERTa)</li>
+                        <li><strong>WordPiece</strong>: Merges pairs maximizing likelihood (used in BERT)</li>
+                        <li><strong>Subword handling</strong>: WordPiece uses ## prefix, BPE uses end-of-word marker</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Positional Encoding -->
+            <section id="positional-encoding" class="algorithm-section">
+                <h2>Positional Encoding <span class="algorithm-type transformer">Transformer</span></h2>
+                
+                <h3>Why Positional Information?</h3>
+                <p>Transformers have no inherent notion of sequence order. Positional encodings inject position information into the model.</p>
+
+                <h3>Sinusoidal Encoding (Attention Is All You Need)</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Sinusoidal Formula</span>
+                    <p>$$PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/d_{model}}}\right)$$</p>
+                    <p>$$PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/d_{model}}}\right)$$</p>
+                    <p>Each dimension is a sinusoid with different frequency, allowing the model to learn relative positions.</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">transformer.py - Sinusoidal PE</div>
+                    <div class="code-line"><span class="line-number">50</span>position = np.arange(max_seq_len).reshape(-1, 1)</div>
+                    <div class="code-line"><span class="line-number">53</span>div_term = <span class="highlight">np.exp(np.arange(0, d_model, 2) * (-np.log(10000.0) / d_model))</span></div>
+                    <div class="code-line"><span class="line-number">56</span>pe[:, 0::2] = <span class="highlight">np.sin(position * div_term)</span>  <span class="comment"># Even indices</span></div>
+                    <div class="code-line"><span class="line-number">57</span>pe[:, 1::2] = <span class="highlight">np.cos(position * div_term)</span>  <span class="comment"># Odd indices</span></div>
+                </div>
+
+                <h3>Learned Positional Encoding (GPT)</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Learned Embeddings</span>
+                    <p>$$PE = W_{pos} \in \mathbb{R}^{L_{max} \times d_{model}}$$</p>
+                    <p>Each position has a learnable embedding vector. Used in GPT models.</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">transformer.py - Learned PE</div>
+                    <div class="code-line"><span class="line-number">115</span>self.pe = Tensor(</div>
+                    <div class="code-line"><span class="line-number">116</span>    <span class="highlight">np.random.randn(max_seq_len, d_model).astype(np.float32) * 0.02</span>,</div>
+                    <div class="code-line"><span class="line-number">117</span>    requires_grad=True  <span class="comment"># Learnable!</span></div>
+                    <div class="code-line"><span class="line-number">118</span>)</div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Comparison:</h4>
+                    <ul>
+                        <li><strong>Sinusoidal</strong>: No learnable parameters, can extrapolate to longer sequences</li>
+                        <li><strong>Learned</strong>: More flexible, but limited to trained sequence length</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Layer Normalization -->
+            <section id="layer-norm" class="algorithm-section">
+                <h2>Layer Normalization <span class="algorithm-type transformer">Transformer</span></h2>
+                
+                <h3>Mathematical Foundation</h3>
+                <div class="math-formula">
+                    <span class="formula-label">LayerNorm Formula</span>
+                    <p>$$\text{LayerNorm}(x) = \gamma \cdot \frac{x - \mu}{\sqrt{\sigma^2 + \epsilon}} + \beta$$</p>
+                    <p>where $\mu = \frac{1}{d}\sum_{i=1}^{d} x_i$ and $\sigma^2 = \frac{1}{d}\sum_{i=1}^{d}(x_i - \mu)^2$</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">vs BatchNorm</span>
+                    <p><strong>BatchNorm:</strong> Normalizes across batch dimension</p>
+                    <p><strong>LayerNorm:</strong> Normalizes across feature dimension</p>
+                    <p>LayerNorm works with any batch size and is identical at train/test time.</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">transformer.py - LayerNorm Implementation</div>
+                    <div class="code-line"><span class="line-number">230</span><span class="comment"># Compute mean and variance along last dimension</span></div>
+                    <div class="code-line"><span class="line-number">231</span>mean = <span class="highlight">np.mean(x.data, axis=-1, keepdims=True)</span></div>
+                    <div class="code-line"><span class="line-number">232</span>var = <span class="highlight">np.var(x.data, axis=-1, keepdims=True)</span></div>
+                    <div class="code-line"><span class="line-number">235</span>x_norm = (x.data - mean) / np.sqrt(var + self.eps)</div>
+                    <div class="code-line"><span class="line-number">238</span>out_data = <span class="highlight">self.gamma.data * x_norm + self.beta.data</span></div>
+                </div>
+
+                <div class="theory-code-link">
+                    <strong>Theory -> Code:</strong> Normalize over the feature dimension (line 231-232), then apply learnable scale (gamma) and shift (beta) parameters (line 238).
+                </div>
+            </section>
+
+            <!-- Causal Self-Attention -->
+            <section id="causal-attention" class="algorithm-section">
+                <h2>Causal Self-Attention <span class="algorithm-type transformer">Transformer</span></h2>
+                
+                <h3>Scaled Dot-Product Attention</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Attention Formula</span>
+                    <p>$$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}} + M\right) V$$</p>
+                    <p>where $M$ is the causal mask (lower triangular).</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Why Scale by $\sqrt{d_k}$?</span>
+                    <p>For large $d_k$, dot products grow in magnitude, pushing softmax into saturation.</p>
+                    <p>Scaling keeps gradients stable: $\text{Var}(q \cdot k) = d_k \Rightarrow \text{Var}\left(\frac{q \cdot k}{\sqrt{d_k}}\right) = 1$</p>
+                </div>
+
+                <h3>Causal Masking</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Autoregressive Constraint</span>
+                    <p>Position $i$ can only attend to positions $0, 1, ..., i$ (not future tokens).</p>
+                    <p>$$M_{ij} = \begin{cases} 0 & \text{if } j \leq i \\ -\infty & \text{if } j > i \end{cases}$$</p>
+                </div>
+
+                <div class="visual-diagram">
+                    <p><strong>Causal Mask (5x5):</strong></p>
+                    <pre style="font-family: monospace; background: #f5f5f5; padding: 10px; display: inline-block;">
+  0   1   2   3   4
+0 [1   0   0   0   0]
+1 [1   1   0   0   0]
+2 [1   1   1   0   0]
+3 [1   1   1   1   0]
+4 [1   1   1   1   1]
+                    </pre>
+                    <p><em>1 = can attend, 0 = masked</em></p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">transformer.py - Causal Self-Attention</div>
+                    <div class="code-line"><span class="line-number">460</span><span class="comment"># Compute attention scores: Q @ K^T / sqrt(d_k)</span></div>
+                    <div class="code-line"><span class="line-number">461</span>scores = <span class="highlight">q @ k.transpose(0, 1, 3, 2) / np.sqrt(self.d_k)</span></div>
+                    <div class="code-line"><span class="line-number">464</span><span class="comment"># Apply causal mask</span></div>
+                    <div class="code-line"><span class="line-number">465</span>causal_mask = self.causal_mask[:seq_len, :seq_len]</div>
+                    <div class="code-line"><span class="line-number">466</span>scores = <span class="highlight">scores + causal_mask.reshape(1, 1, seq_len, seq_len)</span></div>
+                    <div class="code-line"><span class="line-number">472</span><span class="comment"># Softmax and apply to values</span></div>
+                    <div class="code-line"><span class="line-number">473</span>attention_weights = softmax(scores)</div>
+                    <div class="code-line"><span class="line-number">478</span>context = <span class="highlight">attention_weights @ v</span></div>
+                </div>
+
+                <div class="theory-code-link">
+                    <strong>Theory -> Code:</strong> Mask is added before softmax (line 466), causing masked positions to have ~0 attention weight. The large negative value (-1e9) becomes 0 after softmax.
+                </div>
+            </section>
+
+            <!-- Transformer Block -->
+            <section id="transformer-block" class="algorithm-section">
+                <h2>Transformer Block <span class="algorithm-type transformer">Transformer</span></h2>
+                
+                <h3>Pre-LayerNorm Architecture</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Block Structure</span>
+                    <p>$$x' = x + \text{Attention}(\text{LayerNorm}(x))$$</p>
+                    <p>$$\text{output} = x' + \text{FFN}(\text{LayerNorm}(x'))$$</p>
+                    <p>Pre-LN is more stable for training deep networks than Post-LN.</p>
+                </div>
+
+                <div class="visual-diagram">
+                    <div class="network-diagram">
+                        <div class="layer-box">Input x</div>
+                        <div class="arrow">-></div>
+                        <div class="layer-box">LayerNorm</div>
+                        <div class="arrow">-></div>
+                        <div class="layer-box">Causal<br>Attention</div>
+                        <div class="arrow">-></div>
+                        <div class="layer-box">+ (residual)</div>
+                        <div class="arrow">-></div>
+                        <div class="layer-box">LayerNorm</div>
+                        <div class="arrow">-></div>
+                        <div class="layer-box">FFN</div>
+                        <div class="arrow">-></div>
+                        <div class="layer-box">+ (residual)</div>
+                    </div>
+                </div>
+
+                <h3>Feed-Forward Network</h3>
+                <div class="math-formula">
+                    <span class="formula-label">FFN Formula</span>
+                    <p>$$\text{FFN}(x) = \text{GELU}(xW_1 + b_1)W_2 + b_2$$</p>
+                    <p>Typically $d_{ff} = 4 \times d_{model}$</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">transformer.py - TransformerBlock.forward()</div>
+                    <div class="code-line"><span class="line-number">580</span><span class="comment"># Self-attention with residual connection</span></div>
+                    <div class="code-line"><span class="line-number">581</span>attn_out = self.attn(<span class="highlight">self.ln1(x)</span>, mask)  <span class="comment"># Pre-LN</span></div>
+                    <div class="code-line"><span class="line-number">584</span>x_attn = <span class="highlight">x.data + attn_out.data</span>  <span class="comment"># Residual</span></div>
+                    <div class="code-line"><span class="line-number">590</span><span class="comment"># Feed-forward with residual connection</span></div>
+                    <div class="code-line"><span class="line-number">591</span>ffn_out = self.ffn(<span class="highlight">self.ln2(x_attn)</span>)</div>
+                    <div class="code-line"><span class="line-number">594</span>out_data = <span class="highlight">x_attn.data + ffn_out.data</span>  <span class="comment"># Residual</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Why Residual Connections?</h4>
+                    <ul>
+                        <li><strong>Gradient flow</strong>: Direct path for gradients to flow to earlier layers</li>
+                        <li><strong>Identity mapping</strong>: Easy for the model to learn identity if needed</li>
+                        <li><strong>Deep networks</strong>: Enables training very deep models (96+ layers)</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- GPT Model -->
+            <section id="gpt-model" class="algorithm-section">
+                <h2>GPT Model Architecture <span class="algorithm-type gpt">GPT</span></h2>
+                
+                <h3>Decoder-Only Transformer</h3>
+                <div class="math-formula">
+                    <span class="formula-label">GPT Architecture</span>
+                    <p>$$h_0 = W_e[x] + W_p[1:n]$$</p>
+                    <p>$$h_l = \text{TransformerBlock}_l(h_{l-1})$$</p>
+                    <p>$$\text{logits} = h_L W_e^T$$</p>
+                    <p>Token embedding + position embedding -> N transformer blocks -> project to vocabulary</p>
+                </div>
+
+                <div class="visual-diagram">
+                    <div class="network-diagram">
+                        <div class="layer-box">Token IDs</div>
+                        <div class="arrow">-></div>
+                        <div class="layer-box">Token Embed<br>+ Pos Embed</div>
+                        <div class="arrow">-></div>
+                        <div class="layer-box">Block 1</div>
+                        <div class="arrow">-></div>
+                        <div class="layer-box">...</div>
+                        <div class="arrow">-></div>
+                        <div class="layer-box">Block N</div>
+                        <div class="arrow">-></div>
+                        <div class="layer-box">LayerNorm</div>
+                        <div class="arrow">-></div>
+                        <div class="layer-box">LM Head</div>
+                        <div class="arrow">-></div>
+                        <div class="layer-box">Logits</div>
+                    </div>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">gpt.py - GPT Forward Pass</div>
+                    <div class="code-line"><span class="line-number">175</span><span class="comment"># Get token and position embeddings</span></div>
+                    <div class="code-line"><span class="line-number">176</span>tok_emb = <span class="highlight">self.token_embedding.data[input_ids]</span></div>
+                    <div class="code-line"><span class="line-number">180</span>pos_emb = <span class="highlight">self.position_embedding.data[positions]</span></div>
+                    <div class="code-line"><span class="line-number">184</span>x_data = <span class="highlight">tok_emb + pos_emb</span></div>
+                    <div class="code-line"><span class="line-number">195</span><span class="comment"># Pass through transformer blocks</span></div>
+                    <div class="code-line"><span class="line-number">196</span><span class="keyword">for</span> block <span class="keyword">in</span> self.blocks:</div>
+                    <div class="code-line"><span class="line-number">197</span>    x = <span class="highlight">block(x)</span></div>
+                    <div class="code-line"><span class="line-number">200</span>x = self.ln_f(x)  <span class="comment"># Final layer norm</span></div>
+                    <div class="code-line"><span class="line-number">203</span><span class="comment"># Project to vocabulary (tied weights)</span></div>
+                    <div class="code-line"><span class="line-number">204</span>logits_data = <span class="highlight">x.data @ self.token_embedding.data.T</span></div>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Weight Tying</span>
+                    <p>The token embedding matrix $W_e$ is reused for the output projection:</p>
+                    <p>$$\text{logits} = h_L \cdot W_e^T$$</p>
+                    <p>Reduces parameters and provides regularization.</p>
+                </div>
+            </section>
+
+            <!-- Language Modeling Loss -->
+            <section id="language-modeling" class="algorithm-section">
+                <h2>Language Modeling Loss <span class="algorithm-type gpt">GPT</span></h2>
+                
+                <h3>Next Token Prediction</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Cross-Entropy Loss</span>
+                    <p>$$\mathcal{L} = -\frac{1}{N}\sum_{i=1}^{N} \log P(x_i | x_1, ..., x_{i-1})$$</p>
+                    <p>Maximize probability of next token given all previous tokens.</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Autoregressive Factorization</span>
+                    <p>$$P(x_1, x_2, ..., x_n) = \prod_{i=1}^{n} P(x_i | x_1, ..., x_{i-1})$$</p>
+                    <p>The joint probability decomposes into conditional probabilities.</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">gpt.py - Cross-Entropy Loss</div>
+                    <div class="code-line"><span class="line-number">240</span><span class="comment"># Stable softmax</span></div>
+                    <div class="code-line"><span class="line-number">241</span>logits_max = np.max(logits_flat, axis=-1, keepdims=True)</div>
+                    <div class="code-line"><span class="line-number">242</span>exp_logits = np.exp(logits_flat - logits_max)</div>
+                    <div class="code-line"><span class="line-number">243</span>probs = exp_logits / np.sum(exp_logits, axis=-1, keepdims=True)</div>
+                    <div class="code-line"><span class="line-number">247</span>target_probs = <span class="highlight">probs[np.arange(n_samples), targets_flat]</span></div>
+                    <div class="code-line"><span class="line-number">252</span>log_probs = np.log(target_probs + 1e-9)</div>
+                    <div class="code-line"><span class="line-number">253</span>loss_value = <span class="highlight">-np.sum(log_probs * mask) / np.sum(mask)</span></div>
+                </div>
+
+                <div class="theory-code-link">
+                    <strong>Theory -> Code:</strong> Extract target token probabilities (line 247), compute negative log likelihood (line 253). Masking handles padding tokens.
+                </div>
+            </section>
+
+            <!-- Temperature Sampling -->
+            <section id="temperature" class="algorithm-section">
+                <h2>Temperature Sampling <span class="algorithm-type sampling">Sampling</span></h2>
+                
+                <h3>Temperature Scaling</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Scaled Softmax</span>
+                    <p>$$P(x_i) = \frac{\exp(z_i / T)}{\sum_j \exp(z_j / T)}$$</p>
+                    <p>where $T$ is the temperature parameter.</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Temperature Effects</span>
+                    <ul>
+                        <li>$T < 1$: Sharper distribution (more deterministic)</li>
+                        <li>$T = 1$: Standard softmax</li>
+                        <li>$T > 1$: Flatter distribution (more random)</li>
+                        <li>$T \to 0$: Greedy (argmax)</li>
+                        <li>$T \to \infty$: Uniform random</li>
+                    </ul>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">sampling.py - Temperature Sampling</div>
+                    <div class="code-line"><span class="line-number">30</span><span class="comment"># Apply temperature</span></div>
+                    <div class="code-line"><span class="line-number">31</span>scaled_logits = <span class="highlight">logits / temperature</span></div>
+                    <div class="code-line"><span class="line-number">34</span>max_logits = np.max(scaled_logits, axis=-1, keepdims=True)</div>
+                    <div class="code-line"><span class="line-number">35</span>exp_logits = np.exp(scaled_logits - max_logits)</div>
+                    <div class="code-line"><span class="line-number">36</span>probs = exp_logits / np.sum(exp_logits, axis=-1, keepdims=True)</div>
+                </div>
+            </section>
+
+            <!-- Top-K Sampling -->
+            <section id="top-k" class="algorithm-section">
+                <h2>Top-K Sampling <span class="algorithm-type sampling">Sampling</span></h2>
+                
+                <h3>Algorithm</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Top-K Filtering</span>
+                    <ol>
+                        <li>Sort tokens by probability</li>
+                        <li>Keep only top $k$ tokens</li>
+                        <li>Renormalize probabilities</li>
+                        <li>Sample from filtered distribution</li>
+                    </ol>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">sampling.py - Top-K Sampling</div>
+                    <div class="code-line"><span class="line-number">100</span><span class="comment"># Clamp k to vocab size</span></div>
+                    <div class="code-line"><span class="line-number">101</span>k = min(k, vocab_size)</div>
+                    <div class="code-line"><span class="line-number">108</span><span class="comment"># Get indices of top-k logits</span></div>
+                    <div class="code-line"><span class="line-number">109</span>top_k_indices = <span class="highlight">np.argpartition(scaled_logits[i], -k)[-k:]</span></div>
+                    <div class="code-line"><span class="line-number">110</span>filtered_logits[i, top_k_indices] = scaled_logits[i, top_k_indices]</div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Choosing K:</h4>
+                    <ul>
+                        <li>$k = 1$: Greedy decoding</li>
+                        <li>$k = 10-50$: Common range for generation</li>
+                        <li>Larger $k$: More diversity, possible incoherence</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Nucleus Sampling -->
+            <section id="nucleus" class="algorithm-section">
+                <h2>Nucleus (Top-P) Sampling <span class="algorithm-type sampling">Sampling</span></h2>
+                
+                <h3>Algorithm</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Nucleus Filtering</span>
+                    <p>Find smallest set $V^{(p)}$ such that:</p>
+                    <p>$$\sum_{x \in V^{(p)}} P(x) \geq p$$</p>
+                    <p>Sample from this "nucleus" of tokens.</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Advantage over Top-K</span>
+                    <p>Adapts dynamically to probability distribution:</p>
+                    <ul>
+                        <li>Sharp distribution: Few tokens in nucleus</li>
+                        <li>Flat distribution: More tokens in nucleus</li>
+                    </ul>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">sampling.py - Nucleus Sampling</div>
+                    <div class="code-line"><span class="line-number">155</span><span class="comment"># Sort probabilities in descending order</span></div>
+                    <div class="code-line"><span class="line-number">156</span>sorted_indices = np.argsort(probs[i])[::-1]</div>
+                    <div class="code-line"><span class="line-number">157</span>sorted_probs = probs[i, sorted_indices]</div>
+                    <div class="code-line"><span class="line-number">160</span><span class="comment"># Find cumulative probabilities</span></div>
+                    <div class="code-line"><span class="line-number">161</span>cumsum_probs = <span class="highlight">np.cumsum(sorted_probs)</span></div>
+                    <div class="code-line"><span class="line-number">164</span><span class="comment"># Find cutoff index</span></div>
+                    <div class="code-line"><span class="line-number">165</span>cutoff_idx = <span class="highlight">np.searchsorted(cumsum_probs, p) + 1</span></div>
+                    <div class="code-line"><span class="line-number">169</span>nucleus_indices = sorted_indices[:cutoff_idx]</div>
+                </div>
+
+                <div class="theory-code-link">
+                    <strong>Theory -> Code:</strong> Sort by probability (line 156), compute cumulative sum (line 161), find where cumsum reaches threshold p (line 165).
+                </div>
+            </section>
+
+            <!-- Beam Search -->
+            <section id="beam-search" class="algorithm-section">
+                <h2>Beam Search <span class="algorithm-type sampling">Sampling</span></h2>
+                
+                <h3>Algorithm</h3>
+                <div class="math-formula">
+                    <span class="formula-label">Beam Search</span>
+                    <p>Maintain $B$ best partial sequences (beams) at each step:</p>
+                    <ol>
+                        <li>Initialize with input sequence</li>
+                        <li>At each step, expand each beam with top-$B$ next tokens</li>
+                        <li>Keep top-$B$ sequences by score</li>
+                        <li>Return highest-scoring complete sequence</li>
+                    </ol>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Scoring with Length Penalty</span>
+                    <p>$$\text{score} = \frac{\log P(y_1, ..., y_n)}{n^\alpha}$$</p>
+                    <p>where $\alpha$ is the length penalty ($> 1$ favors longer, $< 1$ favors shorter).</p>
+                </div>
+
+                <div class="code-snippet">
+                    <div class="code-header">sampling.py - Beam Search</div>
+                    <div class="code-line"><span class="line-number">250</span><span class="comment"># Get next token logits</span></div>
+                    <div class="code-line"><span class="line-number">251</span>logits = logits_fn(seq)</div>
+                    <div class="code-line"><span class="line-number">252</span>log_probs = np.log(softmax(logits) + 1e-9)</div>
+                    <div class="code-line"><span class="line-number">255</span>top_indices = np.argsort(log_probs[0])[-beam_width:]</div>
+                    <div class="code-line"><span class="line-number">258</span><span class="keyword">for</span> idx <span class="keyword">in</span> top_indices:</div>
+                    <div class="code-line"><span class="line-number">259</span>    new_seq = np.concatenate([seq, [[idx]]], axis=1)</div>
+                    <div class="code-line"><span class="line-number">260</span>    new_score = score + log_probs[0, idx]</div>
+                    <div class="code-line"><span class="line-number">263</span>    <span class="highlight">penalized_score = new_score / (length ** length_penalty)</span></div>
+                </div>
+
+                <div class="key-points">
+                    <h4>Sampling Strategy Comparison:</h4>
+                    <ul>
+                        <li><strong>Greedy</strong>: Fast, deterministic, may be repetitive</li>
+                        <li><strong>Temperature</strong>: Controls randomness globally</li>
+                        <li><strong>Top-K</strong>: Limits to fixed number of candidates</li>
+                        <li><strong>Nucleus</strong>: Adaptive candidate set based on probability</li>
+                        <li><strong>Beam Search</strong>: Explores multiple paths, finds high-probability sequences</li>
+                    </ul>
+                </div>
+            </section>
+
+        </div>
+    </div>
+</body>
+</html>
