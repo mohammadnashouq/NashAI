@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vision-Language Models: Theory & Implementation</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #00b894 0%, #0984e3 100%);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #00b894 0%, #0984e3 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            padding: 30px 40px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .toc h2 {
+            color: #00b894;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .toc ul {
+            list-style: none;
+            columns: 2;
+            column-gap: 30px;
+        }
+
+        .toc li {
+            margin: 10px 0;
+            break-inside: avoid;
+        }
+
+        .toc a {
+            color: #495057;
+            text-decoration: none;
+            font-size: 1.1em;
+            transition: color 0.3s;
+            display: block;
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        .toc a:hover {
+            color: #00b894;
+            background: #e9ecef;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .algorithm-section {
+            margin-bottom: 60px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #00b894;
+        }
+
+        .algorithm-section.vision {
+            border-left-color: #0984e3;
+        }
+
+        .algorithm-section.text {
+            border-left-color: #6c5ce7;
+        }
+
+        .algorithm-section.clip {
+            border-left-color: #e17055;
+        }
+
+        .algorithm-section h2 {
+            color: #00b894;
+            font-size: 2em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .algorithm-section.vision h2 {
+            color: #0984e3;
+        }
+
+        .algorithm-section.text h2 {
+            color: #6c5ce7;
+        }
+
+        .algorithm-section.clip h2 {
+            color: #e17055;
+        }
+
+        .algorithm-section h3 {
+            color: #495057;
+            font-size: 1.5em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        .algorithm-section h4 {
+            color: #00b894;
+            font-size: 1.2em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .algorithm-section.vision h4 {
+            color: #0984e3;
+        }
+
+        .algorithm-section.text h4 {
+            color: #6c5ce7;
+        }
+
+        .algorithm-section.clip h4 {
+            color: #e17055;
+        }
+
+        .math-formula {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #dee2e6;
+            overflow-x: auto;
+        }
+
+        .math-formula .formula-label {
+            background: #00b894;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .vision .math-formula .formula-label {
+            background: #0984e3;
+        }
+
+        .text .math-formula .formula-label {
+            background: #6c5ce7;
+        }
+
+        .clip .math-formula .formula-label {
+            background: #e17055;
+        }
+
+        .visual-diagram {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border: 2px dashed #00b894;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+
+        .vision .visual-diagram {
+            border-color: #0984e3;
+        }
+
+        .text .visual-diagram {
+            border-color: #6c5ce7;
+        }
+
+        .clip .visual-diagram {
+            border-color: #e17055;
+        }
+
+        .code-block {
+            background: #2d3436;
+            color: #dfe6e9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .code-block .comment {
+            color: #74b9ff;
+        }
+
+        .code-block .keyword {
+            color: #fd79a8;
+        }
+
+        .code-block .function {
+            color: #ffeaa7;
+        }
+
+        .code-block .string {
+            color: #55efc4;
+        }
+
+        .code-block .number {
+            color: #fab1a0;
+        }
+
+        .theory-code-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #00b894, #0984e3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9em;
+            margin: 5px 0;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .theory-code-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        p {
+            margin: 15px 0;
+            text-align: justify;
+        }
+
+        ul, ol {
+            margin: 15px 0 15px 30px;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(0,184,148,0.1), rgba(9,132,227,0.1));
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #00b894;
+        }
+
+        .highlight-box.vision {
+            background: linear-gradient(135deg, rgba(9,132,227,0.1), rgba(0,184,148,0.1));
+            border-left-color: #0984e3;
+        }
+
+        .highlight-box.text {
+            background: linear-gradient(135deg, rgba(108,92,231,0.1), rgba(9,132,227,0.1));
+            border-left-color: #6c5ce7;
+        }
+
+        .highlight-box.clip {
+            background: linear-gradient(135deg, rgba(225,112,85,0.1), rgba(253,203,110,0.1));
+            border-left-color: #e17055;
+        }
+
+        footer {
+            background: #2d3436;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        footer p {
+            text-align: center;
+            margin: 5px 0;
+        }
+
+        @media (max-width: 768px) {
+            .toc ul {
+                columns: 1;
+            }
+            
+            header h1 {
+                font-size: 1.8em;
+            }
+            
+            .algorithm-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Vision-Language Models</h1>
+            <p>Theory & Implementation - From Pixels and Words to Shared Understanding</p>
+        </header>
+
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#patch-embedding">1. Patch Embedding</a></li>
+                <li><a href="#vit">2. Vision Transformer (ViT)</a></li>
+                <li><a href="#cnn-encoder">3. CNN Encoder</a></li>
+                <li><a href="#text-encoder">4. Text Encoder</a></li>
+                <li><a href="#contrastive-learning">5. Contrastive Learning</a></li>
+                <li><a href="#clip">6. CLIP Model</a></li>
+                <li><a href="#infonce-loss">7. InfoNCE Loss</a></li>
+                <li><a href="#zero-shot">8. Zero-Shot Classification</a></li>
+                <li><a href="#retrieval">9. Image-Text Retrieval</a></li>
+                <li><a href="#shared-space">10. Shared Embedding Space</a></li>
+            </ul>
+        </nav>
+
+        <div class="content">
+            <!-- Section 1: Patch Embedding -->
+            <section id="patch-embedding" class="algorithm-section vision">
+                <h2>1. Patch Embedding</h2>
+                
+                <p>
+                    Patch embedding is the first step in Vision Transformers. Instead of processing 
+                    images pixel by pixel, we divide the image into fixed-size patches and project 
+                    each patch into an embedding space. This converts the 2D image into a sequence 
+                    of embeddings that can be processed by a Transformer.
+                </p>
+
+                <h3>Mathematical Formulation</h3>
+                
+                <div class="math-formula">
+                    <span class="formula-label">Patch Extraction</span>
+                    <p>Given an image $\mathbf{x} \in \mathbb{R}^{H \times W \times C}$, we divide it into $N$ patches:</p>
+                    $$N = \frac{H \times W}{P^2}$$
+                    <p>where $P$ is the patch size. Each patch $\mathbf{x}_p^i \in \mathbb{R}^{P^2 \cdot C}$ is flattened.</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Linear Projection</span>
+                    <p>Each flattened patch is projected to the embedding dimension $D$:</p>
+                    $$\mathbf{z}_0^i = \mathbf{x}_p^i \mathbf{E} + \mathbf{b}$$
+                    <p>where $\mathbf{E} \in \mathbb{R}^{(P^2 \cdot C) \times D}$ is the projection matrix.</p>
+                </div>
+
+                <h3>Visual Representation</h3>
+                
+                <div class="visual-diagram">
+<pre>
+  Original Image (224 x 224 x 3)
+  ┌─────────────────────────────┐
+  │ ┌───┬───┬───┬───┬───┬───┐  │
+  │ │ 1 │ 2 │ 3 │ 4 │ 5 │...│  │     Patch Size: 16x16
+  │ ├───┼───┼───┼───┼───┼───┤  │     Num Patches: 14 x 14 = 196
+  │ │ 8 │ 9 │10 │11 │12 │...│  │
+  │ ├───┼───┼───┼───┼───┼───┤  │
+  │ │...│...│...│...│...│...│  │
+  │ └───┴───┴───┴───┴───┴───┘  │
+  └─────────────────────────────┘
+              │
+              ▼ Flatten each patch
+  ┌─────────────────────────────┐
+  │ Patch 1: [768 values]       │  (16 x 16 x 3 = 768)
+  │ Patch 2: [768 values]       │
+  │ ...                         │
+  │ Patch 196: [768 values]     │
+  └─────────────────────────────┘
+              │
+              ▼ Linear Projection (E)
+  ┌─────────────────────────────┐
+  │ Embedding 1: [D values]     │
+  │ Embedding 2: [D values]     │
+  │ ...                         │
+  │ Embedding 196: [D values]   │
+  └─────────────────────────────┘
+</pre>
+                </div>
+
+                <h3>Implementation</h3>
+                
+                <div class="code-block">
+<pre><span class="keyword">class</span> <span class="function">PatchEmbedding</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, image_size, patch_size, in_channels, embed_dim):
+        self.patch_size = patch_size
+        self.num_patches = (image_size // patch_size) ** <span class="number">2</span>
+        patch_dim = in_channels * patch_size * patch_size
+        
+        <span class="comment"># Linear projection: (P^2 * C) -> D</span>
+        self.proj = Tensor(np.random.randn(patch_dim, embed_dim) * <span class="number">0.02</span>)
+        self.bias = Tensor(np.zeros(embed_dim))
+    
+    <span class="keyword">def</span> <span class="function">__call__</span>(self, x):
+        <span class="comment"># x: (batch, channels, height, width)</span>
+        batch_size = x.shape[<span class="number">0</span>]
+        
+        <span class="comment"># Extract and flatten patches</span>
+        patches = self._extract_patches(x.data)  <span class="comment"># (B, N, P^2*C)</span>
+        
+        <span class="comment"># Project to embedding dimension</span>
+        embeddings = patches @ self.proj.data + self.bias.data
+        
+        <span class="keyword">return</span> Tensor(embeddings)  <span class="comment"># (B, N, D)</span></pre>
+                </div>
+
+                <a href="vision_encoder.py" class="theory-code-link">View Full Code: vision_encoder.py → PatchEmbedding</a>
+            </section>
+
+            <!-- Section 2: Vision Transformer -->
+            <section id="vit" class="algorithm-section vision">
+                <h2>2. Vision Transformer (ViT)</h2>
+                
+                <p>
+                    The Vision Transformer (ViT) applies the standard Transformer architecture to images 
+                    by treating image patches as tokens. It includes a special [CLS] token whose final 
+                    representation is used as the image embedding.
+                </p>
+
+                <h3>Architecture</h3>
+                
+                <div class="math-formula">
+                    <span class="formula-label">Input Sequence</span>
+                    <p>The input sequence includes a learnable [CLS] token and position embeddings:</p>
+                    $$\mathbf{z}_0 = [\mathbf{x}_{\text{cls}}; \mathbf{z}_0^1; \mathbf{z}_0^2; ...; \mathbf{z}_0^N] + \mathbf{E}_{\text{pos}}$$
+                    <p>where $\mathbf{E}_{\text{pos}} \in \mathbb{R}^{(N+1) \times D}$ are learnable position embeddings.</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Transformer Block</span>
+                    <p>Each block applies multi-head self-attention (MSA) and MLP with residual connections:</p>
+                    $$\mathbf{z}'_\ell = \text{MSA}(\text{LN}(\mathbf{z}_{\ell-1})) + \mathbf{z}_{\ell-1}$$
+                    $$\mathbf{z}_\ell = \text{MLP}(\text{LN}(\mathbf{z}'_\ell)) + \mathbf{z}'_\ell$$
+                </div>
+
+                <h3>Visual Architecture</h3>
+                
+                <div class="visual-diagram">
+<pre>
+     Image                                          Output
+       │                                              ▲
+       ▼                                              │
+  ┌─────────┐                                   [CLS] token
+  │  Patch  │                                         │
+  │Embedding│                                   ┌─────────┐
+  └────┬────┘                                   │   LN    │
+       │                                        └────┬────┘
+       ▼                                             │
+  ┌─────────┐    ┌─────────────────────────────┐    │
+  │  [CLS]  │───▶│     Transformer Blocks      │────┘
+  │    +    │    │  ┌─────────────────────┐    │
+  │ Patches │    │  │ LN → MSA → Residual │    │
+  │    +    │    │  │         ↓           │    │
+  │ Pos Emb │    │  │ LN → MLP → Residual │    │
+  └─────────┘    │  └─────────────────────┘    │
+                 │         × L layers          │
+                 └─────────────────────────────┘
+</pre>
+                </div>
+
+                <div class="highlight-box vision">
+                    <h4>Key Design Choices</h4>
+                    <ul>
+                        <li><strong>Pre-LayerNorm:</strong> LayerNorm is applied before attention and MLP for training stability</li>
+                        <li><strong>[CLS] Token:</strong> A learnable token prepended to the sequence for classification</li>
+                        <li><strong>Position Embeddings:</strong> Learnable 1D position embeddings (not sinusoidal)</li>
+                        <li><strong>Patch Size:</strong> Typically 16×16 or 14×14 pixels</li>
+                    </ul>
+                </div>
+
+                <h3>Implementation</h3>
+                
+                <div class="code-block">
+<pre><span class="keyword">class</span> <span class="function">VisionTransformer</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, image_size, patch_size, embed_dim, num_layers, num_heads):
+        <span class="comment"># Patch embedding</span>
+        self.patch_embed = PatchEmbedding(image_size, patch_size, <span class="number">3</span>, embed_dim)
+        num_patches = self.patch_embed.num_patches
+        
+        <span class="comment"># [CLS] token</span>
+        self.cls_token = Tensor(np.zeros((<span class="number">1</span>, <span class="number">1</span>, embed_dim)))
+        
+        <span class="comment"># Position embeddings</span>
+        self.pos_embed = Tensor(np.random.randn(<span class="number">1</span>, num_patches + <span class="number">1</span>, embed_dim) * <span class="number">0.02</span>)
+        
+        <span class="comment"># Transformer blocks</span>
+        self.blocks = [ViTBlock(embed_dim, num_heads) <span class="keyword">for</span> _ <span class="keyword">in</span> range(num_layers)]
+        
+        <span class="comment"># Final layer norm</span>
+        self.ln = LayerNorm(embed_dim)
+    
+    <span class="keyword">def</span> <span class="function">__call__</span>(self, x):
+        <span class="comment"># Patch embedding</span>
+        x = self.patch_embed(x)  <span class="comment"># (B, N, D)</span>
+        
+        <span class="comment"># Prepend [CLS] token</span>
+        cls = self.cls_token.expand(x.shape[<span class="number">0</span>], -<span class="number">1</span>, -<span class="number">1</span>)
+        x = concat([cls, x], axis=<span class="number">1</span>)  <span class="comment"># (B, N+1, D)</span>
+        
+        <span class="comment"># Add position embeddings</span>
+        x = x + self.pos_embed
+        
+        <span class="comment"># Transformer blocks</span>
+        <span class="keyword">for</span> block <span class="keyword">in</span> self.blocks:
+            x = block(x)
+        
+        <span class="comment"># Return [CLS] token representation</span>
+        <span class="keyword">return</span> self.ln(x[:, <span class="number">0</span>])  <span class="comment"># (B, D)</span></pre>
+                </div>
+
+                <a href="vision_encoder.py" class="theory-code-link">View Full Code: vision_encoder.py → VisionTransformer</a>
+            </section>
+
+            <!-- Section 3: CNN Encoder -->
+            <section id="cnn-encoder" class="algorithm-section vision">
+                <h2>3. CNN Encoder</h2>
+                
+                <p>
+                    CNN-based vision encoders use convolutional neural networks to extract image features.
+                    The ResNet-style architecture with residual connections is commonly used for its
+                    training stability and strong performance.
+                </p>
+
+                <h3>Residual Block</h3>
+                
+                <div class="math-formula">
+                    <span class="formula-label">Skip Connection</span>
+                    <p>The residual block learns a residual mapping:</p>
+                    $$\mathbf{y} = \mathcal{F}(\mathbf{x}, \{W_i\}) + \mathbf{x}$$
+                    <p>where $\mathcal{F}$ represents the stacked convolutions.</p>
+                </div>
+
+                <div class="visual-diagram">
+<pre>
+  Residual Block
+  ┌─────────────────────────────────────┐
+  │                                     │
+  │  Input x ──────────────────────┐    │
+  │     │                          │    │
+  │     ▼                          │    │
+  │  ┌──────┐                      │    │
+  │  │Conv3x3│ + BN + ReLU         │    │
+  │  └──┬───┘                      │    │
+  │     │                          │    │
+  │     ▼                          │    │
+  │  ┌──────┐                      │    │     Identity or
+  │  │Conv3x3│ + BN                │    │     1x1 Conv (if
+  │  └──┬───┘                      │    │     dims change)
+  │     │                          │    │
+  │     ▼                          ▼    │
+  │   ┌───┐                      ┌───┐  │
+  │   │ + │◀─────────────────────│1x1│  │
+  │   └─┬─┘                      └───┘  │
+  │     │                               │
+  │     ▼                               │
+  │   ReLU                              │
+  │     │                               │
+  │  Output                             │
+  └─────────────────────────────────────┘
+</pre>
+                </div>
+
+                <h3>CNN Encoder Architecture</h3>
+                
+                <div class="visual-diagram">
+<pre>
+  Image (B, 3, H, W)
+         │
+         ▼
+  ┌────────────┐
+  │ Conv 7×7   │  stride=2, padding=3
+  │ BatchNorm  │
+  │ ReLU       │
+  └─────┬──────┘
+        │
+        ▼
+  ┌────────────┐
+  │ MaxPool 3×3│  stride=2
+  └─────┬──────┘
+        │
+        ▼
+  ┌────────────┐
+  │  Stage 1   │  64 channels, N blocks
+  └─────┬──────┘
+        │
+        ▼
+  ┌────────────┐
+  │  Stage 2   │  128 channels, N blocks, stride=2
+  └─────┬──────┘
+        │
+        ▼
+  ┌────────────┐
+  │  Stage 3   │  256 channels, N blocks, stride=2
+  └─────┬──────┘
+        │
+        ▼
+  ┌────────────┐
+  │  Stage 4   │  512 channels, N blocks, stride=2
+  └─────┬──────┘
+        │
+        ▼
+  ┌────────────┐
+  │ Global Avg │  (B, 512, 1, 1) → (B, 512)
+  │   Pool     │
+  └─────┬──────┘
+        │
+        ▼
+  ┌────────────┐
+  │   FC       │  512 → embed_dim
+  └─────┬──────┘
+        │
+        ▼
+  Image Embedding (B, embed_dim)
+</pre>
+                </div>
+
+                <a href="vision_encoder.py" class="theory-code-link">View Full Code: vision_encoder.py → CNNEncoder</a>
+            </section>
+
+            <!-- Section 4: Text Encoder -->
+            <section id="text-encoder" class="algorithm-section text">
+                <h2>4. Text Encoder</h2>
+                
+                <p>
+                    The text encoder transforms sequences of tokens into dense embeddings.
+                    It uses a Transformer architecture with causal (autoregressive) attention,
+                    similar to GPT, but focuses on producing a single embedding for the entire text.
+                </p>
+
+                <h3>Architecture</h3>
+                
+                <div class="math-formula">
+                    <span class="formula-label">Token + Position Embedding</span>
+                    $$\mathbf{h}_0 = \mathbf{W}_e[\text{tokens}] + \mathbf{W}_p[\text{positions}]$$
+                    <p>where $\mathbf{W}_e$ is the token embedding matrix and $\mathbf{W}_p$ is the position embedding matrix.</p>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Causal Self-Attention</span>
+                    <p>Each position can only attend to itself and previous positions:</p>
+                    $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}} + M\right)V$$
+                    <p>where $M$ is the causal mask with $M_{ij} = -\infty$ if $j > i$.</p>
+                </div>
+
+                <h3>Text Pooling Strategy</h3>
+                
+                <div class="visual-diagram">
+<pre>
+  Token IDs: [BOS, "a", "photo", "of", "a", "cat", EOS, PAD, PAD]
+                                                    ↑
+                                           Pool at EOS position
+  
+  ┌───────────────────────────────────────────────────────────┐
+  │                                                           │
+  │  Token Embeddings                                         │
+  │  ┌────┬────┬─────┬────┬────┬────┬────┬────┬────┐         │
+  │  │BOS │ a  │photo│ of │ a  │cat │EOS │PAD │PAD │         │
+  │  └─┬──┴─┬──┴──┬──┴─┬──┴─┬──┴─┬──┴─┬──┴────┴────┘         │
+  │    │    │     │    │    │    │    │                       │
+  │    ▼    ▼     ▼    ▼    ▼    ▼    ▼                       │
+  │  ┌─────────────────────────────────┐                      │
+  │  │      Transformer Blocks         │                      │
+  │  │   (with causal attention)       │                      │
+  │  └─────────────────────────────────┘                      │
+  │    │    │     │    │    │    │    │                       │
+  │    ▼    ▼     ▼    ▼    ▼    ▼    ▼                       │
+  │  ┌────┬────┬─────┬────┬────┬────┬────┐                    │
+  │  │ h₀ │ h₁ │ h₂  │ h₃ │ h₄ │ h₅ │ h₆ │  ← Hidden states  │
+  │  └────┴────┴─────┴────┴────┴────┴─┬──┘                    │
+  │                                   │                       │
+  │                                   ▼                       │
+  │                            Text Embedding                 │
+  │                                                           │
+  └───────────────────────────────────────────────────────────┘
+</pre>
+                </div>
+
+                <h3>Implementation</h3>
+                
+                <div class="code-block">
+<pre><span class="keyword">class</span> <span class="function">TextEncoder</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, vocab_size, max_seq_len, embed_dim, num_layers, num_heads):
+        <span class="comment"># Token embedding</span>
+        self.token_embedding = Tensor(np.random.randn(vocab_size, embed_dim) * <span class="number">0.02</span>)
+        
+        <span class="comment"># Position embedding</span>
+        self.position_embedding = Tensor(np.random.randn(max_seq_len, embed_dim) * <span class="number">0.02</span>)
+        
+        <span class="comment"># Transformer blocks with causal attention</span>
+        self.blocks = [TextTransformerBlock(embed_dim, num_heads) 
+                       <span class="keyword">for</span> _ <span class="keyword">in</span> range(num_layers)]
+        
+        <span class="comment"># Final layer norm</span>
+        self.ln_final = LayerNorm(embed_dim)
+    
+    <span class="keyword">def</span> <span class="function">__call__</span>(self, input_ids, attention_mask=<span class="keyword">None</span>):
+        <span class="comment"># Token + position embeddings</span>
+        x = self.token_embedding[input_ids] + self.position_embedding[:seq_len]
+        
+        <span class="comment"># Apply transformer blocks</span>
+        <span class="keyword">for</span> block <span class="keyword">in</span> self.blocks:
+            x = block(x, attention_mask)
+        
+        <span class="comment"># Pool at EOS position</span>
+        eos_positions = attention_mask.sum(axis=<span class="number">1</span>) - <span class="number">1</span>
+        embeddings = x[range(batch_size), eos_positions]
+        
+        <span class="keyword">return</span> self.ln_final(embeddings)</pre>
+                </div>
+
+                <a href="text_encoder.py" class="theory-code-link">View Full Code: text_encoder.py → TextEncoder</a>
+            </section>
+
+            <!-- Section 5: Contrastive Learning -->
+            <section id="contrastive-learning" class="algorithm-section clip">
+                <h2>5. Contrastive Learning</h2>
+                
+                <p>
+                    Contrastive learning is the core training paradigm for CLIP. The goal is to learn 
+                    representations where matching image-text pairs have high similarity while non-matching 
+                    pairs have low similarity.
+                </p>
+
+                <h3>Core Idea</h3>
+                
+                <div class="highlight-box clip">
+                    <p>
+                        Given a batch of $N$ image-text pairs, we want the model to identify which text 
+                        corresponds to which image. There are $N$ correct pairings among $N^2$ possible 
+                        combinations.
+                    </p>
+                </div>
+
+                <h3>Similarity Computation</h3>
+                
+                <div class="math-formula">
+                    <span class="formula-label">Cosine Similarity</span>
+                    <p>After L2 normalization, cosine similarity becomes the dot product:</p>
+                    $$\text{sim}(\mathbf{I}_i, \mathbf{T}_j) = \frac{\mathbf{I}_i \cdot \mathbf{T}_j}{\|\mathbf{I}_i\| \|\mathbf{T}_j\|} = \tilde{\mathbf{I}}_i \cdot \tilde{\mathbf{T}}_j$$
+                    <p>where $\tilde{\mathbf{I}}$ and $\tilde{\mathbf{T}}$ are L2-normalized embeddings.</p>
+                </div>
+
+                <div class="visual-diagram">
+<pre>
+  Contrastive Learning Objective
+  
+       Texts                              Match?
+    T₁  T₂  T₃  T₄                         
+  ┌──┬──┬──┬──┐         ┌──┬──┬──┬──┐
+I₁│✓ │  │  │  │       I₁│1 │0 │0 │0 │
+  ├──┼──┼──┼──┤         ├──┼──┼──┼──┤
+I₂│  │✓ │  │  │       I₂│0 │1 │0 │0 │   Ground Truth:
+  ├──┼──┼──┼──┤   →     ├──┼──┼──┼──┤   Diagonal = 1
+I₃│  │  │✓ │  │       I₃│0 │0 │1 │0 │   Off-diag = 0
+  ├──┼──┼──┼──┤         ├──┼──┼──┼──┤
+I₄│  │  │  │✓ │       I₄│0 │0 │0 │1 │
+  └──┴──┴──┴──┘         └──┴──┴──┴──┘
+  
+  Similarity Matrix            Labels
+</pre>
+                </div>
+
+                <h3>Temperature Scaling</h3>
+                
+                <div class="math-formula">
+                    <span class="formula-label">Scaled Logits</span>
+                    $$\text{logits}_{i,j} = \frac{\tilde{\mathbf{I}}_i \cdot \tilde{\mathbf{T}}_j}{\tau}$$
+                    <p>where $\tau$ is a learnable temperature parameter (initialized to 0.07 in CLIP).</p>
+                    <ul>
+                        <li><strong>Lower τ:</strong> Sharper distribution, model more confident</li>
+                        <li><strong>Higher τ:</strong> Softer distribution, more uniform probabilities</li>
+                    </ul>
+                </div>
+
+                <a href="clip.py" class="theory-code-link">View Full Code: clip.py → contrastive_loss</a>
+            </section>
+
+            <!-- Section 6: CLIP Model -->
+            <section id="clip" class="algorithm-section clip">
+                <h2>6. CLIP Model</h2>
+                
+                <p>
+                    CLIP (Contrastive Language-Image Pre-training) learns visual concepts from natural 
+                    language supervision. It jointly trains an image encoder and text encoder to maximize 
+                    the similarity of correct image-text pairs.
+                </p>
+
+                <h3>Architecture Overview</h3>
+                
+                <div class="visual-diagram">
+<pre>
+                    CLIP Architecture
+  
+      Images                              Texts
+        │                                   │
+        ▼                                   ▼
+  ┌───────────┐                      ┌───────────┐
+  │  Vision   │                      │   Text    │
+  │  Encoder  │                      │  Encoder  │
+  │ (ViT/CNN) │                      │(Transform)│
+  └─────┬─────┘                      └─────┬─────┘
+        │                                  │
+        ▼                                  ▼
+  ┌───────────┐                      ┌───────────┐
+  │ Projection│                      │ Projection│
+  │   Layer   │                      │   Layer   │
+  └─────┬─────┘                      └─────┬─────┘
+        │                                  │
+        ▼                                  ▼
+  ┌───────────┐                      ┌───────────┐
+  │    L2     │                      │    L2     │
+  │ Normalize │                      │ Normalize │
+  └─────┬─────┘                      └─────┬─────┘
+        │                                  │
+        ▼                                  ▼
+  Image Embeddings                  Text Embeddings
+        │                                  │
+        └──────────────┬───────────────────┘
+                       │
+                       ▼
+                ┌─────────────┐
+                │  Similarity │
+                │   Matrix    │
+                │   I @ T.T   │
+                └──────┬──────┘
+                       │
+                       ▼
+                ┌─────────────┐
+                │ Contrastive │
+                │    Loss     │
+                └─────────────┘
+</pre>
+                </div>
+
+                <h3>CLIP Inference Modes</h3>
+                
+                <div class="highlight-box clip">
+                    <h4>Three Main Use Cases</h4>
+                    <ol>
+                        <li><strong>Image-Text Similarity:</strong> Compare any image with any text</li>
+                        <li><strong>Zero-Shot Classification:</strong> Classify images using text prompts</li>
+                        <li><strong>Image-Text Retrieval:</strong> Find matching images or texts</li>
+                    </ol>
+                </div>
+
+                <h3>Implementation</h3>
+                
+                <div class="code-block">
+<pre><span class="keyword">class</span> <span class="function">CLIP</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, vision_encoder, text_encoder, embed_dim, temperature=<span class="number">0.07</span>):
+        self.vision_encoder = vision_encoder
+        self.text_encoder = text_encoder
+        self.embed_dim = embed_dim
+        
+        <span class="comment"># Learnable temperature (log scale for stability)</span>
+        self.log_temperature = Tensor(np.log(temperature), requires_grad=<span class="keyword">True</span>)
+    
+    <span class="keyword">def</span> <span class="function">encode_image</span>(self, images, normalize=<span class="keyword">True</span>):
+        embeddings = self.vision_encoder(images)
+        <span class="keyword">if</span> normalize:
+            embeddings = embeddings / embeddings.norm(dim=-<span class="number">1</span>, keepdim=<span class="keyword">True</span>)
+        <span class="keyword">return</span> embeddings
+    
+    <span class="keyword">def</span> <span class="function">encode_text</span>(self, input_ids, normalize=<span class="keyword">True</span>):
+        embeddings = self.text_encoder(input_ids)
+        <span class="keyword">if</span> normalize:
+            embeddings = embeddings / embeddings.norm(dim=-<span class="number">1</span>, keepdim=<span class="keyword">True</span>)
+        <span class="keyword">return</span> embeddings
+    
+    <span class="keyword">def</span> <span class="function">forward</span>(self, images, input_ids):
+        image_emb = self.encode_image(images, normalize=<span class="keyword">True</span>)
+        text_emb = self.encode_text(input_ids, normalize=<span class="keyword">True</span>)
+        
+        <span class="comment"># Compute similarity with temperature</span>
+        temperature = self.log_temperature.exp()
+        logits = (image_emb @ text_emb.T) / temperature
+        
+        <span class="keyword">return</span> image_emb, text_emb, logits, logits.T</pre>
+                </div>
+
+                <a href="clip.py" class="theory-code-link">View Full Code: clip.py → CLIP</a>
+            </section>
+
+            <!-- Section 7: InfoNCE Loss -->
+            <section id="infonce-loss" class="algorithm-section clip">
+                <h2>7. InfoNCE Loss</h2>
+                
+                <p>
+                    CLIP uses a symmetric cross-entropy loss, which is equivalent to InfoNCE 
+                    (Noise Contrastive Estimation). This loss encourages the model to correctly 
+                    identify the matching pair among all possible pairs.
+                </p>
+
+                <h3>Mathematical Formulation</h3>
+                
+                <div class="math-formula">
+                    <span class="formula-label">Image-to-Text Loss</span>
+                    $$\mathcal{L}_{i \to t} = -\frac{1}{N} \sum_{i=1}^{N} \log \frac{\exp(\text{sim}(\mathbf{I}_i, \mathbf{T}_i) / \tau)}{\sum_{j=1}^{N} \exp(\text{sim}(\mathbf{I}_i, \mathbf{T}_j) / \tau)}$$
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Text-to-Image Loss</span>
+                    $$\mathcal{L}_{t \to i} = -\frac{1}{N} \sum_{i=1}^{N} \log \frac{\exp(\text{sim}(\mathbf{T}_i, \mathbf{I}_i) / \tau)}{\sum_{j=1}^{N} \exp(\text{sim}(\mathbf{T}_i, \mathbf{I}_j) / \tau)}$$
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">Symmetric Loss</span>
+                    $$\mathcal{L}_{\text{CLIP}} = \frac{1}{2}(\mathcal{L}_{i \to t} + \mathcal{L}_{t \to i})$$
+                </div>
+
+                <h3>Intuition</h3>
+                
+                <div class="visual-diagram">
+<pre>
+  InfoNCE as Multi-Class Classification
+  
+  For each image Iᵢ, classify which text it matches:
+  
+    Image I₁ ──▶ [T₁, T₂, T₃, ..., Tₙ]
+                  ↓   ↓   ↓       ↓
+               [0.9, 0.02, 0.01, ..., 0.01]  ← Softmax probabilities
+                 ↑
+              Correct class (cross-entropy target)
+  
+  Similarly for each text Tᵢ, classify which image it matches.
+  
+  With N samples in a batch:
+  - N classification problems for image→text
+  - N classification problems for text→image
+  - Total: 2N classification problems
+</pre>
+                </div>
+
+                <h3>Implementation</h3>
+                
+                <div class="code-block">
+<pre><span class="keyword">def</span> <span class="function">contrastive_loss</span>(image_embeddings, text_embeddings, temperature=<span class="number">0.07</span>):
+    <span class="string">"""Symmetric contrastive loss for CLIP."""</span>
+    batch_size = image_embeddings.shape[<span class="number">0</span>]
+    
+    <span class="comment"># Compute similarity matrix</span>
+    logits_per_image = (image_embeddings @ text_embeddings.T) / temperature
+    logits_per_text = logits_per_image.T
+    
+    <span class="comment"># Labels: diagonal elements are positive pairs</span>
+    labels = np.arange(batch_size)
+    
+    <span class="comment"># Cross-entropy loss for both directions</span>
+    image_loss = cross_entropy(logits_per_image, labels)
+    text_loss = cross_entropy(logits_per_text, labels)
+    
+    <span class="comment"># Symmetric loss</span>
+    loss = (image_loss + text_loss) / <span class="number">2</span>
+    
+    <span class="keyword">return</span> loss</pre>
+                </div>
+
+                <a href="clip.py" class="theory-code-link">View Full Code: clip.py → contrastive_loss</a>
+            </section>
+
+            <!-- Section 8: Zero-Shot Classification -->
+            <section id="zero-shot" class="algorithm-section">
+                <h2>8. Zero-Shot Classification</h2>
+                
+                <p>
+                    One of CLIP's most powerful capabilities is zero-shot image classification. 
+                    Instead of training a classifier on labeled data, we use natural language 
+                    descriptions to define the classes.
+                </p>
+
+                <h3>Process</h3>
+                
+                <div class="math-formula">
+                    <span class="formula-label">Zero-Shot Prediction</span>
+                    <p>Given an image $\mathbf{I}$ and class prompts $\{\mathbf{T}_c\}_{c=1}^{C}$:</p>
+                    $$\hat{y} = \arg\max_c \text{sim}(\mathbf{I}, \mathbf{T}_c)$$
+                </div>
+
+                <div class="visual-diagram">
+<pre>
+  Zero-Shot Classification Pipeline
+  
+  1. Create text prompts for each class:
+     ┌─────────────────────────────────────┐
+     │ "a photo of a dog"                  │ → Text Encoder → T₁
+     │ "a photo of a cat"                  │ → Text Encoder → T₂
+     │ "a photo of a bird"                 │ → Text Encoder → T₃
+     │ "a photo of a car"                  │ → Text Encoder → T₄
+     └─────────────────────────────────────┘
+  
+  2. Encode the test image:
+     ┌─────────┐
+     │  Image  │ → Vision Encoder → I
+     └─────────┘
+  
+  3. Compute similarities:
+     ┌────────────────────────────────┐
+     │ sim(I, T₁) = 0.85  ← Highest! │
+     │ sim(I, T₂) = 0.12             │
+     │ sim(I, T₃) = 0.02             │
+     │ sim(I, T₄) = 0.01             │
+     └────────────────────────────────┘
+  
+  4. Prediction: "dog"
+</pre>
+                </div>
+
+                <h3>Prompt Engineering</h3>
+                
+                <div class="highlight-box">
+                    <h4>Effective Prompt Templates</h4>
+                    <p>Using multiple prompts and averaging embeddings improves accuracy:</p>
+                    <ul>
+                        <li>"a photo of a {class}"</li>
+                        <li>"a picture of a {class}"</li>
+                        <li>"an image of a {class}"</li>
+                        <li>"a {class}"</li>
+                    </ul>
+                </div>
+
+                <h3>Implementation</h3>
+                
+                <div class="code-block">
+<pre><span class="keyword">def</span> <span class="function">zero_shot_classify</span>(model, images, class_embeddings):
+    <span class="string">"""Zero-shot classification using precomputed text embeddings."""</span>
+    <span class="comment"># Encode images</span>
+    image_emb = model.encode_image(images, normalize=<span class="keyword">True</span>)
+    
+    <span class="comment"># Compute similarities with all classes</span>
+    similarities = image_emb @ class_embeddings.T
+    
+    <span class="comment"># Return predicted class indices</span>
+    <span class="keyword">return</span> np.argmax(similarities, axis=-<span class="number">1</span>)
+
+
+<span class="keyword">def</span> <span class="function">create_class_embeddings</span>(model, class_names, templates):
+    <span class="string">"""Create averaged text embeddings for classes."""</span>
+    class_embeddings = []
+    
+    <span class="keyword">for</span> class_name <span class="keyword">in</span> class_names:
+        <span class="comment"># Create prompts from templates</span>
+        prompts = [t.format(class_name) <span class="keyword">for</span> t <span class="keyword">in</span> templates]
+        
+        <span class="comment"># Encode all prompts</span>
+        embeddings = [model.encode_text(p) <span class="keyword">for</span> p <span class="keyword">in</span> prompts]
+        
+        <span class="comment"># Average and normalize</span>
+        avg_emb = np.mean(embeddings, axis=<span class="number">0</span>)
+        avg_emb = avg_emb / np.linalg.norm(avg_emb)
+        
+        class_embeddings.append(avg_emb)
+    
+    <span class="keyword">return</span> np.array(class_embeddings)</pre>
+                </div>
+
+                <a href="clip.py" class="theory-code-link">View Full Code: clip.py → zero_shot_classify</a>
+            </section>
+
+            <!-- Section 9: Image-Text Retrieval -->
+            <section id="retrieval" class="algorithm-section">
+                <h2>9. Image-Text Retrieval</h2>
+                
+                <p>
+                    CLIP embeddings enable efficient image-text retrieval: finding the most 
+                    relevant images for a text query, or finding the best text descriptions 
+                    for an image.
+                </p>
+
+                <h3>Retrieval Metrics</h3>
+                
+                <div class="math-formula">
+                    <span class="formula-label">Recall@K</span>
+                    <p>The fraction of queries where the correct match is in the top-K results:</p>
+                    $$\text{Recall@K} = \frac{1}{N} \sum_{i=1}^{N} \mathbb{1}[\text{rank}(i) \leq K]$$
+                </div>
+
+                <div class="visual-diagram">
+<pre>
+  Image-to-Text Retrieval Example
+  
+  Query Image: [photo of a sunset]
+  
+  Text Database:
+  ┌────────────────────────────────────────────────┐
+  │ 1. "A beautiful sunset over the ocean" (0.92) │ ← Top match
+  │ 2. "Orange and pink sky at dusk" (0.87)       │
+  │ 3. "The sun setting behind mountains" (0.84)  │
+  │ 4. "A photo of clouds" (0.45)                 │
+  │ 5. "Picture of a dog" (0.12)                  │
+  │ ...                                           │
+  └────────────────────────────────────────────────┘
+  
+  Recall@1: 1.0 if "sunset over ocean" is correct
+  Recall@5: 1.0 if any sunset description in top 5
+</pre>
+                </div>
+
+                <h3>Implementation</h3>
+                
+                <div class="code-block">
+<pre><span class="keyword">def</span> <span class="function">compute_retrieval_metrics</span>(image_emb, text_emb, k_values=[<span class="number">1</span>, <span class="number">5</span>, <span class="number">10</span>]):
+    <span class="string">"""Compute Recall@K for retrieval."""</span>
+    n_samples = image_emb.shape[<span class="number">0</span>]
+    
+    <span class="comment"># Similarity matrix</span>
+    similarity = image_emb @ text_emb.T  <span class="comment"># (N, N)</span>
+    
+    <span class="comment"># Ground truth: diagonal is correct</span>
+    labels = np.arange(n_samples)
+    
+    metrics = {}
+    
+    <span class="comment"># Image → Text retrieval</span>
+    i2t_ranks = np.argsort(-similarity, axis=<span class="number">1</span>)
+    <span class="keyword">for</span> k <span class="keyword">in</span> k_values:
+        correct = sum(labels[i] <span class="keyword">in</span> i2t_ranks[i, :k] <span class="keyword">for</span> i <span class="keyword">in</span> range(n_samples))
+        metrics[<span class="string">f'i2t_recall@{k}'</span>] = correct / n_samples
+    
+    <span class="comment"># Text → Image retrieval</span>
+    t2i_ranks = np.argsort(-similarity.T, axis=<span class="number">1</span>)
+    <span class="keyword">for</span> k <span class="keyword">in</span> k_values:
+        correct = sum(labels[i] <span class="keyword">in</span> t2i_ranks[i, :k] <span class="keyword">for</span> i <span class="keyword">in</span> range(n_samples))
+        metrics[<span class="string">f't2i_recall@{k}'</span>] = correct / n_samples
+    
+    <span class="keyword">return</span> metrics</pre>
+                </div>
+
+                <a href="clip.py" class="theory-code-link">View Full Code: clip.py → compute_retrieval_metrics</a>
+            </section>
+
+            <!-- Section 10: Shared Embedding Space -->
+            <section id="shared-space" class="algorithm-section">
+                <h2>10. Shared Embedding Space</h2>
+                
+                <p>
+                    The key insight of CLIP is that images and text are embedded into the same 
+                    vector space, enabling direct comparison between modalities. This is achieved 
+                    through projection layers that map both modalities to a common dimension.
+                </p>
+
+                <h3>Projection to Shared Space</h3>
+                
+                <div class="math-formula">
+                    <span class="formula-label">Projection Layers</span>
+                    <p>Each modality is projected to the shared embedding dimension:</p>
+                    $$\mathbf{I}_{\text{proj}} = \mathbf{I}_{\text{enc}} \mathbf{W}_I$$
+                    $$\mathbf{T}_{\text{proj}} = \mathbf{T}_{\text{enc}} \mathbf{W}_T$$
+                    <p>where $\mathbf{W}_I \in \mathbb{R}^{D_I \times D}$ and $\mathbf{W}_T \in \mathbb{R}^{D_T \times D}$.</p>
+                </div>
+
+                <div class="visual-diagram">
+<pre>
+  Shared Embedding Space
+  
+                    D-dimensional space
+                          │
+       ┌──────────────────┼──────────────────┐
+       │                  │                  │
+       │    Image         │      Text        │
+       │   Embeddings     │    Embeddings    │
+       │                  │                  │
+       │     ●I₁          │         ●T₁      │
+       │              ●I₂ │    ●T₂           │
+       │                  │                  │
+       │           ●I₃────┼────●T₃           │  ← Matching pairs
+       │                  │                  │     are close
+       │     ●I₄          │              ●T₄ │
+       │                  │                  │
+       └──────────────────┼──────────────────┘
+                          │
+  
+  After training:
+  • Matching image-text pairs cluster together
+  • Similar concepts form neighborhoods
+  • Enables cross-modal similarity search
+</pre>
+                </div>
+
+                <h3>L2 Normalization</h3>
+                
+                <div class="highlight-box">
+                    <h4>Why Normalize?</h4>
+                    <ul>
+                        <li><strong>Bounded similarity:</strong> Cosine similarity ranges from -1 to 1</li>
+                        <li><strong>Focus on direction:</strong> Only angular distance matters, not magnitude</li>
+                        <li><strong>Stable training:</strong> Prevents embedding collapse or explosion</li>
+                        <li><strong>Efficient computation:</strong> Dot product equals cosine similarity</li>
+                    </ul>
+                </div>
+
+                <div class="math-formula">
+                    <span class="formula-label">L2 Normalization</span>
+                    $$\tilde{\mathbf{x}} = \frac{\mathbf{x}}{\|\mathbf{x}\|_2} = \frac{\mathbf{x}}{\sqrt{\sum_i x_i^2}}$$
+                </div>
+
+                <h3>Properties of the Learned Space</h3>
+                
+                <div class="visual-diagram">
+<pre>
+  Semantic Structure in Embedding Space
+  
+     "dog"●─────●[image of dog]
+           \
+            \●"puppy"
+             \
+              \●[image of puppy]
+  
+  
+     "car"●─────●[image of car]
+           \
+            \●"automobile"
+             \
+              \●[image of sports car]
+  
+  
+  Key Properties:
+  ├─ Similar concepts cluster together
+  ├─ Cross-modal pairs are aligned
+  ├─ Semantic relationships preserved
+  └─ Enables compositional understanding
+</pre>
+                </div>
+
+                <a href="clip.py" class="theory-code-link">View Full Code: clip.py → CLIP.encode_image, CLIP.encode_text</a>
+            </section>
+
+        </div>
+
+        <footer>
+            <p><strong>NashAI - Vision-Language Models</strong></p>
+            <p>Bridging Vision and Language Through Contrastive Learning</p>
+            <p>From Pixels and Words to Shared Understanding</p>
+        </footer>
+    </div>
+</body>
+</html>
