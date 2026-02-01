@@ -330,6 +330,14 @@ yourlib/
 - RLHF
 - Multimodal agents
 - New loss functions
+- Diffusion Models
+- Conditional Difuusion Models
+- Auto encoders
+- Conditional Auto Encoders
+- Gan networks.
+- Simolated anyling.
+- Deep Fake Network.
+- Comparision wiht pytorch.
 
 This is where papers → code happens.
 

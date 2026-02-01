@@ -1,0 +1,15 @@
+# Requirements for NashAI vs PyTorch Benchmarks
+
+# Core dependencies
+numpy>=1.21.0
+matplotlib>=3.4.0
+
+# PyTorch (for comparison)
+torch>=1.10.0
+torchvision>=0.11.0
+
+# Scikit-Learn (for classical ML comparison and data loading)
+scikit-learn>=1.0.0
+
+# Optional: for progress bars
+tqdm>=4.62.0

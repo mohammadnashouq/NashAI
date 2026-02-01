@@ -105,11 +105,12 @@ class Tensor:
             if self._children:
                 if isinstance(child_grads, tuple):
                     for child, child_grad in zip(self._children, child_grads):
-                        if child is not None and child.requires_grad:
+                        # Skip if child_grad is None (gradient handled manually by layer)
+                        if child is not None and child.requires_grad and child_grad is not None:
                             child.backward(child_grad)
                 else:
                     # Single child
-                    if self._children[0] is not None and self._children[0].requires_grad:
+                    if self._children[0] is not None and self._children[0].requires_grad and child_grads is not None:
                         self._children[0].backward(child_grads)
     
     def zero_grad(self):

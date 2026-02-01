@@ -74,7 +74,11 @@ class SGD(Optimizer):
                 continue
             
             # Ensure we're working with numpy arrays
-            grad = np.asarray(param.grad.data)
+            # Handle both Tensor.grad (numpy array) and layer.grad (Tensor)
+            if isinstance(param.grad, Tensor):
+                grad = np.asarray(param.grad.data)
+            else:
+                grad = np.asarray(param.grad)
             param_data = np.asarray(param.data)
             
             # Apply weight decay
@@ -140,7 +144,11 @@ class Adam(Optimizer):
                 continue
 
             # Ensure we're working with numpy arrays
-            grad = np.asarray(param.grad.data)
+            # Handle both Tensor.grad (numpy array) and layer.grad (Tensor)
+            if isinstance(param.grad, Tensor):
+                grad = np.asarray(param.grad.data)
+            else:
+                grad = np.asarray(param.grad)
             param_data = np.asarray(param.data)
             
             # Apply weight decay
@@ -215,7 +223,11 @@ class RMSprop(Optimizer):
                 continue
             
             # Ensure we're working with numpy arrays
-            grad = np.asarray(param.grad.data)
+            # Handle both Tensor.grad (numpy array) and layer.grad (Tensor)
+            if isinstance(param.grad, Tensor):
+                grad = np.asarray(param.grad.data)
+            else:
+                grad = np.asarray(param.grad)
             param_data = np.asarray(param.data)
             
             # Apply weight decay
